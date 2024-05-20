@@ -10,6 +10,7 @@ function Get-RuleSetting {
     )]
     param(
         # The name of the function used in the Settings File
+        # If not given, then the caller's name will be used
         [Parameter(
             ParameterSetName = 'one',
             ValueFromPipeline,
@@ -17,41 +18,38 @@ function Get-RuleSetting {
         )]
         [string]$Setting,
 
-        # Return all settings
+        # Get the complete Settings table
         [Parameter(
-            ParameterSetName = 'all'
         )]
         [switch]$All
+
     )
     begin {
         Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
     }
     process {
-        $allSettings = [Helper]::Instance.GetRuleArguments()
-        if ($null -$allSettings) {
-            if ($All) {
-                $allSettings
-            } else {
-                if ($PSBoundParameters.ContainsKey('Setting')) {
-                    if ($Setting -match '(\w+)-(\w+)<\w+>') {
-                        $Setting = Format-RuleName $Setting
-                        | Select-Object -ExpandProperty ShortName
-                    }
+        if ($All) {
+            [Helper]::Instance.GetRuleArguments()
+
+        } else {
+            if ($PSBoundParameters.ContainsKey('Setting')) {
+                <#------------------------------------------------------------------
+             Our function names are in `Verb-Noun` format, but our Settings
+             are going to be in the form of `VerbNoun`.  So, just in case the
+             function name was passed in, format it before we do the lookup
+            ------------------------------------------------------------------#>
+                if ($Setting -match '(\w+)-(\w+)<\w+>') {
+                    $Setting = Format-RuleName $Setting
+                    | Select-Object -ExpandProperty ShortName
                 } else {
                     $Setting = Get-PSCallStack
                     | Select-Object -First 1 -Skip 1
                     | Format-RuleName
                     | Select-Object -ExpandProperty ShortName
                 }
-
-                if ($allSettings.ContainsKey($Setting)) {
-                    $allSettings[$Setting]
-                } else {
-                    Write-Verbose "No settings for $Setting were found"
-                }
+                #! If the Setting is not found, this will return $null
+                [Helper]::Instance.GetRuleArguments( $Setting )
             }
-        } else {
-            Write-Verbose 'Could not retrieve rule settings'
         }
     }
     end {
