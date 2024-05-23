@@ -1,0 +1,4 @@
+@{
+    PSScriptAnalyzer = 'latest'
+    InvokeBuild = 'latest'
+}

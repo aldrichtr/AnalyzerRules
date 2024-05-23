@@ -12,7 +12,8 @@ env:
   owner: 'aldrichtr'
   repo: ${{ github.event.repository.name }}
   root: ${{ github.workspace }}
-  test_helper: ${{ github.workspace }}\tests\TestHelpers.psm1
+  stitch: ${{ github.workspace }}\\.build
+  test_helper: ${{ github.workspace }}\\TestHelpers.psm1
   output_path: out\pester
 
 jobs:
