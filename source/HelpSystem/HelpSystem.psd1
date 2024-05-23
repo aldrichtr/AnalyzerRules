@@ -3,8 +3,8 @@
     #region Module Info
 
     ModuleVersion = '0.1.0'
-    Description = 'PSScriptAnalyzer rules for analyzing Format and Style'
-    GUID = '5f613430-ae06-424a-a339-5389f32ad979'
+    Description   = 'PSScriptAnalyzer Rules to analyze PowerShell module manifests'
+    GUID = 'e7dcfedf-7828-428b-81ee-caec56e3abfc'
     # HelpInfoURI = ''
 
     #endregion Module Info
@@ -13,7 +13,7 @@
     #---------------------------------------------------------------------------
     #region Module Components
 
-    RootModule = 'FormatAndStyle.psm1'
+    RootModule = 'HelpSystem.psm1'
     # ScriptsToProcess = @()
     # TypesToProcess = @()
     # FormatsToProcess = @()
@@ -68,9 +68,9 @@
         #---------------------------------------------------------------------------
         #region Project
 
-        # Tags = @()
-        # LicenseUri = ''
-        # ProjectUri = ''
+        Tags = @()
+        LicenseUri = ''
+        ProjectUri = ''
         IconUri = ''
         PreRelease = ''
         RequireLicenseAcceptance = ''
