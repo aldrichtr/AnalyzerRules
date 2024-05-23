@@ -2,9 +2,9 @@
     #---------------------------------------------------------------------------
     #region Module Info
 
-    ModuleVersion = '0.1.0'
-    Description = 'PSScriptAnalyzer rules for analyzing Format and Style'
-    GUID = '5f613430-ae06-424a-a339-5389f32ad979'
+    ModuleVersion = '0.0.1'
+    Description = 'Custom rules for PSScriptAnalyzer'
+    GUID = 'ab3b906a-640f-48e2-b78e-cd98d64a907a'
     # HelpInfoURI = ''
 
     #endregion Module Info
@@ -13,11 +13,17 @@
     #---------------------------------------------------------------------------
     #region Module Components
 
-    RootModule = 'FormatAndStyle.psm1'
+    # RootModule = ''
     # ScriptsToProcess = @()
     # TypesToProcess = @()
     # FormatsToProcess = @()
-    # NestedModules = @()
+    NestedModules = @(
+        'System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable',
+        'System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable',
+        'System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable',
+        'System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable',
+        'System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable'
+    )
     # ModuleList = ''
     # FileList = @()
 
@@ -68,9 +74,9 @@
         #---------------------------------------------------------------------------
         #region Project
 
-        # Tags = @()
-        # LicenseUri = ''
-        # ProjectUri = ''
+        Tags = @()
+        LicenseUri = ''
+        ProjectUri = ''
         IconUri = ''
         PreRelease = ''
         RequireLicenseAcceptance = ''
@@ -80,6 +86,7 @@
         #endregion Project
         #---------------------------------------------------------------------------
 
-        } # end PSData
+         # end PSData
     } # end PrivateData
 } # end hashtable
+
