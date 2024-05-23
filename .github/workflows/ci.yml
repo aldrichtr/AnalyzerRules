@@ -19,7 +19,7 @@ defaults:
 
 env:
   repo: ${{ github.event.repository.name }}
-  pssa_config: ${{ github.workspace }}\PSScriptAnalyzerSettings.psd1
+  pssa_config: ${{ github.workspace }}\.build\pssa\PSScriptAnalyzerSettings.psd1
   unit_test_config: ${{ github.workspace}}\.build\profiles\default\pester\UnitTests.config.psd1
   unit_test_helper: ${{ github.workspace}}\tests\TestHelpers.psm1
 jobs:
