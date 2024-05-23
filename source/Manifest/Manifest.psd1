@@ -3,8 +3,8 @@
     #region Module Info
 
     ModuleVersion = '0.1.0'
-    Description = 'PSScriptAnalyzer rules for analyzing Format and Style'
-    GUID = '5f613430-ae06-424a-a339-5389f32ad979'
+    Description = 'Rules for analyzing PowerShell module manifests'
+    GUID = '26c2195e-b946-4256-9996-5248c95c3011'
     # HelpInfoURI = ''
 
     #endregion Module Info
@@ -13,7 +13,7 @@
     #---------------------------------------------------------------------------
     #region Module Components
 
-    RootModule = 'FormatAndStyle.psm1'
+    RootModule = 'Manifest.psm1'
     # ScriptsToProcess = @()
     # TypesToProcess = @()
     # FormatsToProcess = @()
@@ -56,9 +56,9 @@
     #---------------------------------------------------------------------------
     #region Author
 
-    Author = 'Timothy Aldrich'
+    Author = 'aldrichtr'
     CompanyName = 'aldrichtr'
-    Copyright = '(c) Timothy Aldrich. All rights reserved.'
+    Copyright = '(c) aldrichtr. All rights reserved.'
 
     #endregion Author
     #---------------------------------------------------------------------------
@@ -68,9 +68,9 @@
         #---------------------------------------------------------------------------
         #region Project
 
-        # Tags = @()
-        # LicenseUri = ''
-        # ProjectUri = ''
+        Tags = @()
+        LicenseUri = ''
+        ProjectUri = ''
         IconUri = ''
         PreRelease = ''
         RequireLicenseAcceptance = ''
