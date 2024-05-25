@@ -2,7 +2,7 @@
     #---------------------------------------------------------------------------
     #region Module Info
 
-    ModuleVersion = '0.0.1'
+    ModuleVersion = '0.1.0'
     Description = 'Custom rules for PSScriptAnalyzer'
     GUID = 'ab3b906a-640f-48e2-b78e-cd98d64a907a'
     # HelpInfoURI = ''
@@ -17,13 +17,7 @@
     # ScriptsToProcess = @()
     # TypesToProcess = @()
     # FormatsToProcess = @()
-    NestedModules = @(
-        'System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable',
-        'System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable',
-        'System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable',
-        'System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable',
-        'System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable System.Collections.Hashtable'
-    )
+    # NestedModules = @()
     # ModuleList = ''
     # FileList = @()
 
@@ -85,8 +79,6 @@
 
         #endregion Project
         #---------------------------------------------------------------------------
-
-         # end PSData
+        }  # end PSData
     } # end PrivateData
 } # end hashtable
-
