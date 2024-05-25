@@ -22,8 +22,8 @@ BeforeDiscovery {
 }
 
 $options = @{
-    Tag  = @( 'unit', 'StringCase', 'ConvertTo', 'TrainCase')
-    Name = 'GIVEN the public function ConvertTo-TrainCase'
+    Tag  = @( 'unit', 'StringCase', 'Get', 'CasePattern')
+    Name = 'GIVEN the public function Get-CasePattern'
     Foreach = $sourceFile
 }
 Describe @options {
@@ -45,7 +45,7 @@ Describe @options {
             $parseErrors | Should -BeNullOrEmpty
         }
         It 'THEN it should load without error' {
-            (Get-Command 'ConvertTo-TrainCase') | Should -Not -BeNullOrEmpty
+            (Get-Command 'Get-CasePattern') | Should -Not -BeNullOrEmpty
         }
 
         It 'THEN it should contain a function' {
@@ -68,5 +68,17 @@ Describe @options {
         }
     }
     <# --=-- #>
+    Context 'WHEN the word case is <WordCase> and DontAllowDigits is <DontAllowDigits>' -Foreach (
+        Get-ChildItem $dataDirectory -Filter *.psd1
+        | Foreach-Object { Import-Psd $_ }
+    ) {
+        BeforeEach {
+            $result = Get-CasePattern $WordCase -DontAllowDigits:$DontAllowDigits
+        }
+
+        It 'THEN the pattern should be <Expected>' {
+            $result | Should -BeExactly $Expected
+        }
+    }
     <# --=-- #>
 }
