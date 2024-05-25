@@ -1,21 +1,56 @@
 #Requires -Modules @{ ModuleName = 'stitch'; ModuleVersion = '0.1' }
 function Get-SourceFilePath {
     [CmdletBinding()]
-    param()
+    param(
+        # Specifies a path to one or more locations.
+        [Parameter(
+        Position = 0,
+        ValueFromPipeline,
+        ValueFromPipelineByPropertyName
+        )]
+        [Alias('PSPath')]
+        [string]$Path
+    )
     begin {
         Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
     }
     process {
-        $callStack = Get-PSCallStack
-        $caller = $callStack[1]
-        $testFileName = Split-Path $caller.ScriptName -LeafBase
+        if (-not ($PSBoundParameters.ContainsKey('Path'))) {
+            $callStack = Get-PSCallStack
+            $caller = $callStack[1]
+            $Path = $caller.ScriptName
+            Write-Debug "No path given, caller script is $Path"
+        }
+
+        $testFileName = Split-Path $Path -LeafBase
+
+        Write-Debug "TestFileName is $testFileName"
         if (-not ([string]::IsNullorEmpty($testFileName))) {
             $sourceName = $testFileName -replace '\.Tests', ''
             $sourceItem = Get-SourceItem
-            | Where-Object Name -Like $sourceName -ErrorAction SilentlyContinue
+            | Where-Object Name -Like $sourceName
+            | Select-Object -First 1
+            Write-Debug "stitch found source name $sourceName"
+            Write-Debug "- source item $($sourceItem.Path)"
         } else {
             $PSCmdlet.ThrowTerminatingError($_)
         }
+
+        if ([string]::IsNullorEmpty($sourceItem)) {
+            $getChildItemSplat = @{
+                Path = (Join-Path (Get-Location) 'source')
+                Filter = $sourceName
+                Recurse = $true
+            }
+            Write-Debug "Looking for source file"
+            $found = Get-ChildItem @getChildItemSplat
+            if ($null -eq $found) {
+                throw "Could not find $sourceName"
+            } else {
+                $sourceItem = $found
+            }
+        }
+
         if ($null -ne $sourceItem) {
             $sourceItem.Path | Write-Output
         } else {
@@ -120,3 +155,87 @@ function Get-TestData {
         Write-Debug "`n$('-' * 80)`n-- End $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
     }
 }
+
+<#
+.SYNOPSIS
+    Custom assertion for PSScriptAnalyzer tests
+.DESCRIPTION
+    `FollowRule` is a convenience function for Pester tests using the PSSA.
+    While there are many patterns that can be used to analyze a code block and
+    wrap it in a Pester "It block", this function makes the "Should" assertion
+    more like a natural-language test. So, rather than something like:
+    ``` powershell
+    if ($analysis.RuleName -contains $rule) {
+        # gather failures
+    }
+    $failures.Count | Should -Be 0
+    ```
+    A much more succinct test looks like:
+    ``` powershell
+    $analysis | Should -Pass $rule
+    ```
+    Additionally, this assertion "pretty formats" the error messages a bit.
+    A Pester Should function will output 'Expected foo but got bar' followed by
+    a very poorly formatted dump of the rule output.
+    `FollowRule` does a decent job of collecting the relevant properties of the
+    DiagnosticRecord properties.  It will print:
+    ```
+    Rule violation: <rule name>
+    <rule message>
+    <file:line:column>
+    <file:line:column>
+    <file:line:column>
+    ```
+.NOTES
+    this function gets added to Pester using the `Add-AssertionOperator` which
+    is in this file below the function
+.EXAMPLE
+     $analysis | Should -Pass $rule
+#>
+Function FollowRule {
+    [CmdletBinding()]
+    param(
+        $ActualValue,
+        $PSSARule,
+        $CallerSessionState,
+        [Switch]$Negate
+    )
+    begin {
+        $AssertionResult = [PSCustomObject]@{
+            Succeeded      = $false
+            FailureMessage = ""
+        }
+    }
+    process {
+        if ( $ActualValue.RuleName -contains $PSSARule.RuleName) {
+            $AssertionResult.Succeeded = $false
+            $AssertionResult.FailureMessage = @"
+`n$($PSSARule.Severity) - $($PSSARule.CommonName)
+$($ActualValue.Message)
+$($PSSARule.SuggestedCorrections)
+"@
+            # there may be several
+            # lines that do not Rule$rule the rule, collect them all into one
+            # error message
+            $ActualValue | Where-Object {
+                $_.RuleName -eq $PSSARule.RuleName
+            } | ForEach-Object {
+                $AssertionResult.FailureMessage += "'{0}' at {1}:{2}:{3}`n" -f
+                $_.Extent.Text,
+                $_.Extent.File,
+                $_.Extent.StartLineNumber,
+                $_.Extent.StartColumnNumber
+            }
+        } else {
+            $AssertionResult.Succeeded = $true
+        }
+    }
+    end {
+        if ($Negate) {
+            $AssertionResult.Succeeded = -not($AssertionResult.Succeeded)
+        }
+        $AssertionResult
+    }
+}
+
+Add-AssertionOperator -Name 'Pass' -Test $Function:FollowRule
