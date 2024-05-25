@@ -57,7 +57,7 @@ if ($private:prefixFile | Test-Path) {
 }
 
 if (Test-Path "$PSScriptRoot\LoadOrder.txt") {
-    Write-Host 'Using custom load order'
+    Write-Information 'Using custom load order'
     $private:custom = Get-Content "$PSScriptRoot\LoadOrder.txt"
     Get-ChildItem @$private:importOptions -Recurse
     | ForEach-Object {
