@@ -22,8 +22,8 @@ BeforeDiscovery {
 }
 
 $options = @{
-    Tag  = @( 'unit', 'StringCase', 'ConvertTo', 'TrainCase')
-    Name = 'GIVEN the public function ConvertTo-TrainCase'
+    Tag  = @( 'unit', 'StringCase', 'Test', 'DotCase')
+    Name = 'GIVEN the public function Test-DotCase'
     Foreach = $sourceFile
 }
 Describe @options {
@@ -45,7 +45,7 @@ Describe @options {
             $parseErrors | Should -BeNullOrEmpty
         }
         It 'THEN it should load without error' {
-            (Get-Command 'ConvertTo-TrainCase') | Should -Not -BeNullOrEmpty
+            (Get-Command 'Test-DotCase') | Should -Not -BeNullOrEmpty
         }
 
         It 'THEN it should contain a function' {

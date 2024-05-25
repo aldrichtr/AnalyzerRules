@@ -67,4 +67,6 @@ Describe @options {
             $analysis | Should -Pass $rule
         }
     }
+    <# --=-- #>
+    <# --=-- #>
 }

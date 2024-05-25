@@ -67,4 +67,18 @@ Describe @options {
             $analysis | Should -Pass $rule
         }
     }
+    <# --=-- #>
+    Context "WHEN the phrase '<Phrase>' is tested" -ForEach (
+        Get-ChildItem $dataDirectory -Filter *.psd1
+        | Foreach-Object { Import-Psd $_ }
+    ) {
+        BeforeEach {
+            $result = $Phrase | Test-SnakeCase
+        }
+
+        It 'THEN it should be <Expect>' {
+            $result | Should -Be $Expect
+        }
+    }
+    <# --=-- #>
 }

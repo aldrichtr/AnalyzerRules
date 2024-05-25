@@ -67,4 +67,18 @@ Describe @options {
             $analysis | Should -Pass $rule
         }
     }
+    <# --=-- #>
+    Context 'WHEN the word case is <WordCase> and DontAllowDigits is <DontAllowDigits>' -Foreach (
+        Get-ChildItem $dataDirectory -Filter *.psd1
+        | Foreach-Object { Import-Psd $_ }
+    ) {
+        BeforeEach {
+            $result = Get-CasePattern $WordCase -DontAllowDigits:$DontAllowDigits
+        }
+
+        It 'THEN the pattern should be <Expected>' {
+            $result | Should -BeExactly $Expected
+        }
+    }
+    <# --=-- #>
 }

@@ -67,4 +67,22 @@ Describe @options {
             $analysis | Should -Pass $rule
         }
     }
+    <# --=-- #>
+    Context "WHEN the phrase '<Phrase>' is given" -ForEach (
+        Get-ChildItem $dataDirectory -Filter *.psd1
+        | Foreach-Object { Import-Psd $_ }
+    ) {
+        BeforeEach {
+            $result = $Phrase | Split-Phrase
+        }
+
+        It 'THEN it should be split into <Expect.Count> words' {
+            $result.Count | Should -BeExactly $Expect.Count
+        }
+
+        It "THEN '<Phrase>' is split into <Expect>" {
+            (Compare-Object $result $Expect).InputObject | Should -BeNullOrEmpty
+        }
+    }
+    <# --=-- #>
 }
