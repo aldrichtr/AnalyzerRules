@@ -24,12 +24,14 @@ function Test-SnakeCase {
         $withDigits = '[a-z0-9]+'
     }
     process {
+        Write-Debug "Testing phrase '$InputObject' for snake case"
         if ($DontAllowDigits) {
             $word = $withoutDigits
         } else {
             $word = $withDigits
         }
-        $snakeCasePattern = "^$word-$word(-$word)*"
+        $snakeCasePattern = "^${word}_${word}(_${word})*"
+        Write-Debug "- using regex $snakeCasePattern"
         $InputObject -cmatch $snakeCasePattern
     }
     end {
