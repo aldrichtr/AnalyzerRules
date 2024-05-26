@@ -68,16 +68,16 @@ Describe @options {
         }
     }
     <# --=-- #>
-    Context 'WHEN the word case is <WordCase> and DontAllowDigits is <DontAllowDigits>' -Foreach (
+    Context 'WHEN the phrase is <TestInput>' -Foreach (
         Get-ChildItem $dataDirectory -Filter *.psd1
         | Foreach-Object { Import-Psd $_ }
     ) {
         BeforeEach {
-            $result = Get-CasePattern $WordCase -DontAllowDigits:$DontAllowDigits
+                $result = $TestInput | Test-Case @TestOptions
         }
 
         It 'THEN the pattern should be <Expected>' {
-            $result | Should -BeExactly $Expected
+            $result | Should -Be $Expected
         }
     }
     <# --=-- #>
