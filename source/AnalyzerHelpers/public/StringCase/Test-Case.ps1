@@ -57,36 +57,15 @@ function Test-Case {
         $cancelChars    = @('.', ' ', '-', '_')
 
         $pattern = [StringBuilder]::new()
-
-        function Set-Pattern {
-            param(
-                [string]$case,
-                [switch]$DontAllowDigits
-            )
-            if ($DontAllowDigits) {
-                $lower     = '[a-z]'
-                $upper     = '[A-Z]'
-                $any       = '[a-zA-Z]'
-            } else {
-                $lower   = '[a-z0-9]'
-                $upper   = '[A-Z0-9]'
-                $any       = '[a-zA-Z0-9]'
-            }
-            switch ($case) {
-                'upper' { $upper }
-                'lower' { $lower }
-                'capital' { "$upper$lower+" }
-                'startLower' { "$lower$any+"}
-                'startUpper' { "$upper$any+"}
-            }
-        }
+        Set-Alias -Name 'getPattern' -Value Get-CasePattern -Scope Private
     }
     process {
         #TODO: Refactor all Test-*Case functions to use this based on parameters
         [void]$pattern.Append('^')
-        $wordCasePattern = (Set-Pattern $WordCase $DontAllowDigits)
+        $wordCasePattern = (getPattern $WordCase $DontAllowDigits)
+
         if ($PSBoundParameters.ContainsKey('FirstWordCase')) {
-            [void]$pattern.Append( (Set-Pattern $FirstWordCase $DontAllowDigits) )
+            [void]$pattern.Append( (getPattern $FirstWordCase $DontAllowDigits) )
         } else {
             [void]$pattern.Append($wordCasePattern)
         }
@@ -105,6 +84,7 @@ function Test-Case {
         $InputObject -cmatch $pattern.ToString()
     }
     end {
+        Remove-Alias pattern -Scope Private
         Write-Debug "`n$('-' * 80)`n-- End $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
     }
 }
