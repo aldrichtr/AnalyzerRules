@@ -62,10 +62,10 @@ function Test-Case {
     process {
         #TODO: Refactor all Test-*Case functions to use this based on parameters
         [void]$pattern.Append('^')
-        $wordCasePattern = (getPattern $WordCase $DontAllowDigits)
+        $wordCasePattern = (getPattern $WordCase -DontAllowDigits:$DontAllowDigits)
 
         if ($PSBoundParameters.ContainsKey('FirstWordCase')) {
-            [void]$pattern.Append( (getPattern $FirstWordCase $DontAllowDigits) )
+            [void]$pattern.Append( (getPattern $FirstWordCase -DontAllowDigits:$DontAllowDigits) )
         } else {
             [void]$pattern.Append($wordCasePattern)
         }
@@ -76,15 +76,15 @@ function Test-Case {
             '(',
             $Separator,
             $wordCasePattern,
-            ')'
+            ')*'
         ))
         [void]$pattern.Append('$')
 
-        Write-Debug "Using Pattern: '$($pattern.ToString())"
+        Write-Debug "Using Pattern: '$($pattern.ToString())'"
         $InputObject -cmatch $pattern.ToString()
     }
     end {
-        Remove-Alias pattern -Scope Private
+        Remove-Alias getPattern -Scope Private
         Write-Debug "`n$('-' * 80)`n-- End $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
     }
 }
