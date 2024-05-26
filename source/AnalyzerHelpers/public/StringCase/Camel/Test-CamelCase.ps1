@@ -10,6 +10,8 @@ function Test-CamelCase {
     param(
         # The word to test
         [Parameter(
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName
         )]
         [string]$InputObject,
 

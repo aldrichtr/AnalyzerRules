@@ -8,6 +8,8 @@ function Test-CapitalCase {
     param(
         # The word to be tested
         [Parameter(
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName
         )]
         [string]$InputObject
     )
