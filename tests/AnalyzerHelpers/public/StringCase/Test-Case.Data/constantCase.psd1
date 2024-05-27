@@ -6,7 +6,7 @@
             WordCase = 'upper'
             Separator = '_'
         }
-        Expected = $true
+        Expect = $true
     }
     @{
         TestInput = 'THIS_IS_noT_CONSTANT_CASE'
@@ -14,6 +14,6 @@
             WordCase = 'upper'
             Separator = '_'
         }
-        Expected = $false
+        Expect = $false
     }
 )

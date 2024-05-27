@@ -76,8 +76,8 @@ Describe @options {
             $result = Get-CasePattern $WordCase -DontAllowDigits:$DontAllowDigits
         }
 
-        It 'THEN the pattern should be <Expected>' {
-            $result | Should -BeExactly $Expected
+        It 'THEN the pattern should be <Expect>' {
+            $result | Should -BeExactly $Expect
         }
     }
     <# --=-- #>

@@ -6,7 +6,7 @@
             WordCase = 'lower'
             Separator = '-'
         }
-        Expected = $true
+        Expect = $true
     }
     @{
         TestInput = 'this-is-Not-kebab-case'
@@ -14,6 +14,6 @@
             WordCase = 'lower'
             Separator = '-'
         }
-        Expected = $false
+        Expect = $false
     }
 )

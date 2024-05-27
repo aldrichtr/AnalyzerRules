@@ -6,7 +6,7 @@
             WordCase = 'upper'
             Separator = '-'
         }
-        Expected = $true
+        Expect = $true
     }
     @{
         TestInput = 'THIS-IS-noT-COBOL-CASE'
@@ -14,6 +14,6 @@
             WordCase = 'upper'
             Separator = '-'
         }
-        Expected = $false
+        Expect = $false
     }
 )

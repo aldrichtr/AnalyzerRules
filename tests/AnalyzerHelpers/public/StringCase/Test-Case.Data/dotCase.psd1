@@ -5,7 +5,7 @@
             WordCase = 'lower'
             Separator = '\.'
         }
-        Expected = $true
+        Expect = $true
     }
     @{
         TestInput = 'this.is.Not.dot.case'
@@ -13,6 +13,6 @@
             WordCase = 'lower'
             Separator = '\.'
         }
-        Expected = $false
+        Expect = $false
     }
 )

@@ -6,7 +6,7 @@
             WordCase = 'capital'
             FirstWordCase = 'lower'
         }
-        Expected = $true
+        Expect = $true
     }
     @{
         TestInput = 'ThisIsnotcamelCase'
@@ -14,6 +14,6 @@
             WordCase = 'capital'
             FirstWordCase = 'lower'
         }
-        Expected = $false
+        Expect = $false
     }
 )
