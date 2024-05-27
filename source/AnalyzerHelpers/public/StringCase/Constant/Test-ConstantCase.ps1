@@ -20,17 +20,9 @@ function Test-ConstantCase {
     )
     begin {
         Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
-        $withoutDigits = '[A-Z]+'
-        $withDigits = '[A-Z0-9]+'
     }
     process {
-        if ($DontAllowDigits) {
-            $word = $withoutDigits
-        } else {
-            $word = $withDigits
-        }
-        $cobolCasePattern = "^$word_$word(_$word)*"
-        $InputObject -cmatch $cobolCasePattern
+        $InputObject | Test-Case -WordCase upper -Separator '_'
     }
     end {
         Write-Debug "`n$('-' * 80)`n-- End $($MyInvocation.MyCommand.Name)`n$('-' * 80)"

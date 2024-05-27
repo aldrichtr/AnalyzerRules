@@ -56,9 +56,10 @@ function Convert-Case {
             [void]$newWord.Append($InputObject.Substring(0, 1))
             $InputObject = $InputObject.Substring(1)
         }
-        $parts = [ArrayList]::new(
-            ($InputObject | Split-Phrase)
-        )
+        $parts = [ArrayList]::new()
+
+        ($InputObject | Split-Phrase)
+        | ForEach-Object { [void]$parts.Add($_) }
 
         if ($PSBoundParameters.ContainsKey('FirstWordCase')) {
             switch ($FirstWordCase) {

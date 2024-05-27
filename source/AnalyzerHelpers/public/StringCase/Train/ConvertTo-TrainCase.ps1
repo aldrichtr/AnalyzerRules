@@ -11,7 +11,7 @@ function ConvertTo-TrainCase {
             ValueFromPipeline,
             ValueFromPipelineByPropertyName
         )]
-        [Alias()]
+        [Alias('Name')]
         [string[]]$InputObject
     )
     begin {
@@ -19,6 +19,7 @@ function ConvertTo-TrainCase {
     }
     process {
         foreach ($phrase in $InputObject) {
+            Write-Debug "Convert $phrase to Train-Case"
             $phrase | Convert-Case capital -Separator '-'
         }
     }

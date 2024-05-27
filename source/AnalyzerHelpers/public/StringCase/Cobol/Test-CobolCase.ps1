@@ -20,17 +20,9 @@ function Test-CobolCase {
     )
     begin {
         Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
-        $withoutDigits = '[A-Z]+'
-        $withDigits = '[A-Z0-9]+'
     }
     process {
-        if ($DontAllowDigits) {
-            $word = $withoutDigits
-        } else {
-            $word = $withDigits
-        }
-        $cobolCasePattern = "^$word-$word(-$word)*"
-        $InputObject -cmatch $cobolCasePattern
+        Test-Case @PSBoundParameters -WordCase 'upper' -Separator '-'
     }
     end {
         Write-Debug "`n$('-' * 80)`n-- End $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
