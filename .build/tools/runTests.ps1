@@ -35,8 +35,12 @@ if (-not ($PSBoundParameters.ContainsKey('HelperModule'))) {
 
 }
 
-
-Import-Module "$env:HOME\projects\stitch\source\stitch" -Force
+try {
+   Import-Module "$env:HOME\projects\stitch\source\stitch" -Force
+}
+catch {
+    Write-Information "stitch not found"
+}
 
 if (Test-Path $ConfigFile) {
     try {
