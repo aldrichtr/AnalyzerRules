@@ -5,30 +5,42 @@ param(
     [string]$ConfigFile,
 
     [Parameter()]
-    [string]$HelperModule
-    )
+    [string]$HelperModule,
 
-    if (-not ($PSBoundParameters.ContainsKey('ConfigFile'))) {
-        $options = @{
-            Path = (Get-Location)
-            ChildPath = '.build\profiles\default\pester'
-            AdditionalChildPath = 'UnitTests.config.psd1'
+    [Parameter()]
+    [switch]$NoModule
+)
 
-        }
-        $ConfigFile = (Join-Path @options)
-        Remove-Variable -Name 'options'
-    }
+$loadScript = (Join-Path $PSScriptRoot 'loadSourceModule.ps1')
 
-    if (-not ($PSBoundParameters.ContainsKey('HelperModule'))) {
-        $options = @{
-            Path = (Get-Location)
-            ChildPath = 'tests'
-            AdditionalChildPath = 'TestHelpers.psm1'
-        }
-        $HelperModule = (Join-Path @options)
-        Remove-Variable -Name 'options'
+if (-not ($PSBoundParameters.ContainsKey('ConfigFile'))) {
+    $options = @{
+        Path                = (Get-Location)
+        ChildPath           = '.build\profiles\default\pester'
+        AdditionalChildPath = 'UnitTests.config.psd1'
 
     }
+    $ConfigFile = (Join-Path @options)
+    Remove-Variable -Name 'options'
+}
+
+if (-not ($PSBoundParameters.ContainsKey('HelperModule'))) {
+    $options = @{
+        Path                = (Get-Location)
+        ChildPath           = 'tests'
+        AdditionalChildPath = 'TestHelpers.psm1'
+    }
+    $HelperModule = (Join-Path @options)
+    Remove-Variable -Name 'options'
+
+}
+
+try {
+   Import-Module "$env:HOME\projects\stitch\source\stitch" -Force
+}
+catch {
+    Write-Information "stitch not found"
+}
 
 if (Test-Path $ConfigFile) {
     try {
@@ -49,7 +61,9 @@ if (Test-Path $ConfigFile) {
 if (Test-Path $HelperModule) {
     Import-Module $helperModule -Force
 } else {
-    throw "Could not find test helper module"
+    throw 'Could not find test helper module'
 }
+
+if (-not ($NoModule)) { . $loadScript }
 
 Invoke-Pester -Configuration $pesterConfig

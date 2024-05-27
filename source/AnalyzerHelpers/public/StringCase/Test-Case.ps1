@@ -1,3 +1,5 @@
+using namespace System.Text
+
 
 function Test-Case {
     <#
@@ -51,17 +53,38 @@ function Test-Case {
     )
     begin {
         Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
-        $lowerWithDigit = '[a-z0-9]'
-        $lowerNoDigit   = '[a-z]'
-        $upperWithDigit = '[A-Z0-9]'
-        $upperNoDigit   = '[A-Z]'
         $up             = 1
         $cancelChars    = @('.', ' ', '-', '_')
+
+        $pattern = [StringBuilder]::new()
+        Set-Alias -Name 'getPattern' -Value Get-CasePattern -Scope Private
     }
     process {
         #TODO: Refactor all Test-*Case functions to use this based on parameters
+        [void]$pattern.Append('^')
+        $wordCasePattern = (getPattern $WordCase -DontAllowDigits:$DontAllowDigits)
+
+        if ($PSBoundParameters.ContainsKey('FirstWordCase')) {
+            [void]$pattern.Append( (getPattern $FirstWordCase -DontAllowDigits:$DontAllowDigits) )
+        } else {
+            [void]$pattern.Append($wordCasePattern)
+        }
+
+        [void]$pattern.Append($Separator)
+        [void]$pattern.Append($wordCasePattern)
+        [void]$pattern.AppendJoin('', @(
+            '(',
+            $Separator,
+            $wordCasePattern,
+            ')*'
+        ))
+        [void]$pattern.Append('$')
+
+        Write-Debug "Using Pattern: '$($pattern.ToString())'"
+        $InputObject -cmatch $pattern.ToString()
     }
     end {
+        Remove-Alias getPattern -Scope Private
         Write-Debug "`n$('-' * 80)`n-- End $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
     }
 }

@@ -1,8 +1,8 @@
 
-function Test-SnakeCase {
+function Test-TrainCase {
     <#
     .SYNOPSIS
-        Returns true if the given word is snake_case
+        Returns true if the given word is Train-Case
     #>
     [CmdletBinding()]
     param(
@@ -20,8 +20,9 @@ function Test-SnakeCase {
     )
     begin {
         Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
-        $withoutDigits = '[a-z]+'
-        $withDigits = '[a-z0-9]+'
+        $withoutDigits = '[A-Z][a-z]+'
+        $withDigits = '[A-Z][a-z0-9]+'
+        $separator = '-'
     }
     process {
         if ($DontAllowDigits) {
@@ -29,8 +30,8 @@ function Test-SnakeCase {
         } else {
             $word = $withDigits
         }
-        $snakeCasePattern = "^$word_$word(_$word)*"
-        $InputObject -cmatch $snakeCasePattern
+        $trainCasePattern = "^${word}${separator}${word}(${separator}${word})*"
+        $InputObject -cmatch $trainCasePattern
     }
     end {
         Write-Debug "`n$('-' * 80)`n-- End $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
