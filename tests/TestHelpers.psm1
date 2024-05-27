@@ -1,4 +1,4 @@
-#Requires -Modules @{ ModuleName = 'stitch'; ModuleVersion = '0.1' }
+
 function Get-SourceFilePath {
     [CmdletBinding()]
     param(
@@ -27,11 +27,13 @@ function Get-SourceFilePath {
         Write-Debug "TestFileName is $testFileName"
         if (-not ([string]::IsNullorEmpty($testFileName))) {
             $sourceName = $testFileName -replace '\.Tests', ''
-            $sourceItem = Get-SourceItem
-            | Where-Object Name -Like $sourceName
-            | Select-Object -First 1
-            Write-Debug "stitch found source name $sourceName"
-            Write-Debug "- source item $($sourceItem.Path)"
+            if ($null -ne (Get-Command 'Get-SourceItem')) {
+                $sourceItem = Get-SourceItem
+                | Where-Object Name -Like $sourceName
+                | Select-Object -First 1
+                Write-Debug "stitch found source name $sourceName"
+                Write-Debug "- source item $($sourceItem.Path)"
+            }
         } else {
             $PSCmdlet.ThrowTerminatingError($_)
         }
