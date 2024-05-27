@@ -194,7 +194,7 @@
 
         # Default 'Filtered'
         # The verbosity of stacktrace output, options are None, FirstLine, Filtered and Full.'
-        StackTraceVerbosity = 'None'
+        StackTraceVerbosity = 'Filtered'
 
         # Default 'Auto'
         # The CI format of error output in build logs, options are None, Auto, AzureDevops and
