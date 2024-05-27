@@ -68,5 +68,17 @@ Describe @options {
         }
     }
     <# --=-- #>
+    Context "WHEN converting the phrase <Phrase> to camel case" -ForEach (
+        Get-ChildItem $dataDirectory -Filter *.psd1
+        | Foreach-Object { Import-Psd $_ }
+    ) {
+
+        BeforeAll {
+            $result = $Phrase | ConvertTo-ConstantCase
+        }
+        It 'THEN it is formatted as <Expect>' {
+            $result | Should -BeLike $Expect
+        }
+    }
     <# --=-- #>
 }

@@ -72,12 +72,12 @@ Describe @options {
         Get-ChildItem $dataDirectory -Filter *.psd1
         | Foreach-Object { Import-Psd $_ }
     ) {
-        BeforeEach {
+        BeforeAll {
                 $result = $TestInput | Test-Case @TestOptions
         }
 
-        It 'THEN the pattern should be <Expected>' {
-            $result | Should -Be $Expected
+        It 'THEN the pattern should be <Expect>' {
+            $result | Should -Be $Expect
         }
     }
     <# --=-- #>
