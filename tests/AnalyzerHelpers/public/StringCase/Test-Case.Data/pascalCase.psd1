@@ -5,13 +5,13 @@
         TestOptions = @{
             WordCase = 'capital'
         }
-        Expected = $true
+        Expect = $true
     }
     @{
         TestInput = 'thisIsnotpascalCase'
         TestOptions = @{
             WordCase = 'capital'
         }
-        Expected = $false
+        Expect = $false
     }
 )

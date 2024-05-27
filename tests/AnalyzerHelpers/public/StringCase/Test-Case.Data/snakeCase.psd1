@@ -5,7 +5,7 @@
             WordCase = 'lower'
             Separator = '_'
         }
-        Expected = $true
+        Expect = $true
     }
     @{
         TestInput = 'this_is_Not_snake_case'
@@ -13,6 +13,6 @@
             WordCase = 'lower'
             Separator = '_'
         }
-        Expected = $false
+        Expect = $false
     }
 )

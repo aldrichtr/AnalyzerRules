@@ -6,7 +6,7 @@
             WordCase = 'capital'
             Separator = '-'
         }
-        Expected = $true
+        Expect = $true
     }
     @{
         TestInput = 'This-Is-NOT_Train-Case'
@@ -14,6 +14,6 @@
             WordCase = 'capital'
             Separator = '-'
         }
-        Expected = $false
+        Expect = $false
     }
 )
