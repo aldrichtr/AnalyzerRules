@@ -18,7 +18,7 @@ function ConvertTo-ConstantCase {
         Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
     }
     process {
-        foreach ($phase in $InputObject) {
+        foreach ($phrase in $InputObject) {
             $phrase | Convert-Case upper -Separator '_'
         }
 

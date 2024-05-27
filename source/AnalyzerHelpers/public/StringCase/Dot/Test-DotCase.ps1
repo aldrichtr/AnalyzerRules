@@ -20,17 +20,9 @@ function Test-DotCase {
     )
     begin {
         Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
-        $withoutDigits = '[a-z]+'
-        $withDigits = '[a-z0-9]+'
     }
     process {
-        if ($DontAllowDigits) {
-            $word = $withoutDigits
-        } else {
-            $word = $withDigits
-        }
-        $dotCasePattern = "^$word\.$word(\.$word)*"
-        $InputObject -cmatch $dotCasePattern
+        Test-Case @PSBoundParameters -WordCase lower -Separator '\.'
     }
     end {
         Write-Debug "`n$('-' * 80)`n-- End $($MyInvocation.MyCommand.Name)`n$('-' * 80)"

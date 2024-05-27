@@ -1,5 +1,4 @@
 
-using namespace System.Text
 function ConvertTo-CamelCase {
     <#
     .SYNOPSIS
@@ -13,7 +12,7 @@ function ConvertTo-CamelCase {
             ValueFromPipelineByPropertyName
         )]
         [Alias('Name')]
-        [string[]]$InputObject
+        [string]$InputObject
     )
     begin {
         Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
