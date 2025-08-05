@@ -7,6 +7,8 @@ function Merge-Setting {
         Create a single Analyzer Settings table from multiple tables
     .NOTES
         Uses Metadata\Update-MetaData
+    .EXAMPLE
+      Get-Item $env:APPDATA\pwsh\pssa | Merge-Setting
     #>
     [CmdletBinding()]
     param(
@@ -27,7 +29,6 @@ function Merge-Setting {
     )
     begin {
         Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
-        $defaultConfigFile = '\.pssa\.psd1$'
     }
     process {
         if ([string]::IsNullorEmpty($Settings)) {
@@ -44,23 +45,18 @@ function Merge-Setting {
                     Get-ChildItem $location | Merge-Setting $Settings
                 } else {
                     Write-Debug "  - It is a file"
-                    if ($location.Name -match $defaultConfigFile) {
+                    if ($location.Name -match '\.psd1$') {
                         try {
                             $fragment = Import-PowerShellDataFile -Path $location.FullName
-                            Write-Debug "  - Loaded settings"
-                            Write-Debug ('-' * 80)
-                            Write-Debug "Updating Settings with $($fragment | ConvertTo-Psd | Out-String)"
-                            Write-Debug "Before update : Settings`n$($Settings | ConvertTo-Psd | Out-String)"
-
-                            $Settings = Update-Object -InputObject $Settings -UpdateObject (Import-PowerShellDataFile $location.FullName)
-                            Write-Debug "After update : Settings`n$($Settings | ConvertTo-Psd | Out-String)"
-                            Write-Debug ('-' * 80)
+                            $Settings = Update-Object -UpdateObject $fragment
                         }
                         catch {
                             Write-Warning "Could not import $($location.Name)"
                         }
                     }
                 }
+            } else {
+              Write-Warning "$location is not a valid path"
             }
         }
     }
