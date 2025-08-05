@@ -1,6 +1,6 @@
 
 using namespace System.Collections.ObjectModel
-using namespace Microsoft.Windows.PowerShell.ScriptAnalyzer
+using namespace Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic
 
 function Initialize-CorrectionCollection {
     <#
@@ -12,5 +12,5 @@ function Initialize-CorrectionCollection {
     [CmdletBinding()]
     param(
     )
-    [Collection[Generic.CorrectionExtent]]::new()
+    [Collection[CorrectionExtent]]::new()
 }

@@ -6,6 +6,7 @@ function New-PSScriptAnalyzerCorrection {
     .SYNOPSIS
         Create a new PSSA Correction
     #>
+    [Alias('New-Correction')]
     [CmdletBinding()]
     param(
         # Starting line number

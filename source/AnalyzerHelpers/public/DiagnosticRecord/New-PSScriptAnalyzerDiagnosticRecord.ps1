@@ -10,40 +10,31 @@ function New-PSScriptAnalyzerDiagnosticRecord {
     [CmdletBinding()]
     param(
         # Why this record was created
-        [Parameter(
-            ValueFromPipelineByPropertyName
-        )]
+        [Parameter( ValueFromPipelineByPropertyName)]
         [string]$Message,
 
         # A span of text in the script
-        [Parameter(
-            ValueFromPipelineByPropertyName
-        )]
+        [Parameter( ValueFromPipelineByPropertyName)]
         [ScriptExtent]$Extent,
 
         # The name of the PSSA Rule
-        [Parameter(
-        )]
+        [Parameter()]
         [string]$RuleName,
 
         # The severity level of the issue
-        [Parameter(
-        )]
+        [Parameter()]
         [DiagnosticSeverity]$Severity,
 
         # Path to the script file
-        [Parameter(
-        )]
+        [Parameter()]
         [string]$ScriptPath,
 
         # The rule ID for this record
-        [Parameter(
-        )]
+        [Parameter()]
         [string]$SuppressionId,
 
         # Suggested correction to the extent
-        [Parameter(
-        )]
+        [Parameter()]
         [CorrectionExtent[]]$SuggestedCorrections
     )
     begin {
