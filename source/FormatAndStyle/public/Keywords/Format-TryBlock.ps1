@@ -36,8 +36,9 @@ function Format-TryBlock {
         $corrections = Initialize-CorrectionCollection
         $ruleArgs = Get-RuleSetting
 
+        # TODO(Defaults): If DefaultCase Setting is set then we might not want to break if not configured
         #! break early if this rule is not configured or explicitly disabled
-        if (($null = $ruleArgs) -or (-not ($ruleArgs.Enabled))) { return $null }
+        if (($null -eq $ruleArgs) -or (-not ($ruleArgs.Enabled))) { return $null }
 
         if ($null -eq $ruleArgs.Case) {
             $ruleArgs.Case = $DEFAULT_BLOCK_CASE
