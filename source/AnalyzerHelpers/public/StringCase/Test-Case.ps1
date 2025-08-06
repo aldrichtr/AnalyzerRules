@@ -1,5 +1,5 @@
-using namespace System.Text
 
+using namespace System.Text
 
 function Test-Case {
     <#
@@ -42,7 +42,6 @@ function Test-Case {
         # The number of consecutive uppercase letters
         # By default, only one upper
         [Parameter(
-            Position = 0
         )]
         [int]$ConsecutiveUppercase,
 
