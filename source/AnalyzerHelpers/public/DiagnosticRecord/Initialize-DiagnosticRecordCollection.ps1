@@ -12,21 +12,5 @@ function Initialize-DiagnosticRecordCollection {
     [OutputType([List[DiagnosticRecord]])]
     param(
     )
-    begin {
-        Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
-    }
-    process {
-      # TODO: If the only thing this function does is create the list, then it is probably not needed
-        try {
-            $list = [List[DiagnosticRecord]]::new()
-            if ($null -ne $list) {
-                $list
-            }
-        } catch {
-            throw "Could not create DiagnosticRecord collection`n$_"
-        }
-    }
-    end {
-        Write-Debug "`n$('-' * 80)`n-- End $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
-    }
+            [List[DiagnosticRecord]]::new()
 }
