@@ -9,7 +9,9 @@ function Initialize-CorrectionCollection {
     .EXAMPLE
         $corrections = Initialize-CorrectionCollection
     #>
+    [Alias('New-CorrectionCollection')]
     [CmdletBinding()]
+    [OutputType([Collection[CorrectionExtent]])]
     param(
     )
     [Collection[CorrectionExtent]]::new()
