@@ -31,11 +31,11 @@ function Format-NamedBlock {
         $DEFAULT_BLOCK_CASE = 'lower'
 
         $ruleName = (Format-RuleName)
-        $results = Initialize-DiagnosticRecordCollection
-        $corrections = Initialize-CorrectionCollection
+        $results = New-ResultsCollection
+        $corrections = New-CorrectionCollection
         $ruleArgs = Get-RuleSetting
 
-        if (($null = $ruleArgs) -or (-not ($ruleArgs.Enabled))) { return $null }
+        if (($null -eq $ruleArgs) -or (-not ($ruleArgs.Enabled))) { return $null }
 
         if ($null -eq $ruleArgs.Case) {
             $ruleArgs.Case = $DEFAULT_BLOCK_CASE
