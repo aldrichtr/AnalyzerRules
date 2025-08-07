@@ -22,7 +22,6 @@ function Select-RuleViolation {
             Position = 0,
             ValueFromPipelineByPropertyName
         )]
-        [Alias('Predicate')]
         [scriptblock]$Filter,
 
         # The AST that will be searched by `$Filter`

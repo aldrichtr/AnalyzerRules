@@ -1,12 +1,11 @@
 
 using namespace Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic
 
-function New-PSScriptAnalyzerCorrection {
+function New-Correction {
     <#
     .SYNOPSIS
         Create a new PSSA Correction
     #>
-    [Alias('New-Correction')]
     [CmdletBinding()]
     param(
         # Starting line number
