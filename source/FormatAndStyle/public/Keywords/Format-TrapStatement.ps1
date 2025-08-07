@@ -1,35 +1,23 @@
-﻿
+
 using namespace Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic
 using namespace System.Management.Automation.Language
 
-function Format-TryBlock {
+function Format-TrapStatement {
     <#
     .SYNOPSIS
-        Ensure Try/Catch script blocks are in the case given in the FormatTryBlock setting.
-    .DESCRIPTION
-        The try blocks in the file are `try`, `catch`, and `finally`.  There are three types of 'case'
-        settings that can be configured in the Settings file under FormatTryBlock, `lower`, `upper`, `capital`
-        ```powershell
-        Rules = @{
-            FormatTryBlock = @{
-                Enabled = $true
-                Case = 'lower'
-            }
-        }
-        ```
+        Format the `trap` keyword using Upper, Lower, or Capitalize case.
     #>
     [CmdletBinding()]
     [OutputType([DiagnosticRecord[]])]
     param(
-        [Parameter(
-            Mandatory
-        )]
-        [ValidateNotNullOrEmpty()]
-        [TryBlockAst]$TryBlockAst
+      [Parameter(
+        Mandatory
+      )]
+      [TrapStatementAst]$TrapStatementAst
     )
     begin {
-        #TODO(Defaults): Add a DefaultCase Setting somewhere appropriate
-        $DEFAULT_BLOCK_CASE = 'lower'
+        Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
+      $DEFAULT_CASE = 'lower'
 
         $ruleName = (Format-RuleName)
         $results = New-DiagnosticRecordCollection
@@ -61,8 +49,8 @@ function Format-TryBlock {
                 [Ast]$Ast
             )
             $text = $Ast.Extent.Text
-            if (($Ast -is [TryStatementAst]) -and
-             ($text -imatch '^(begin|process|end|clean)')) {
+            if (($Ast -is [TrapStatementAst]) -and
+             ($text -imatch '^trap')) {
                 switch ($case) {
                     ([StringCase]::Lower) { $text | Test-Case lower }
                     ([StringCase]::Upper) { $text | Test-Case upper }
@@ -73,7 +61,7 @@ function Format-TryBlock {
     }
     process {
         try {
-            $violations = $TryBlockAst | Select-RuleViolation $predicate
+            $violations = $TrapStatementAst | Select-RuleViolation $predicate
             :violation foreach ($violation in $violations) {
                 $extent = $violation.Extent
                 $text = $extent.Text
@@ -87,19 +75,19 @@ function Format-TryBlock {
                         $newText = $text | Convert-Case lower
                         $newExtent = $extent
                         | New-Correction -Replacement ($newText)
-                        $message = "Try block keyword $text should be lowercase"
+                        $message = "trap keyword $text should be lowercase"
                     }
                     ([StringCase]::Upper) {
                         $newText = $text | Convert-Case upper
                         $newExtent = $extent
                         | New-Correction -Replacement ($newText)
-                        $message = "Try block keyword $text should be uppercase"
+                        $message = "trap keyword $text should be uppercase"
                     }
                     ([StringCase]::Capital) {
                         $newText = $text | Convert-Case capital
                         $newExtent = $extent
                         | New-Correction -Replacement ($newText)
-                        $message = "Try block keyword $text should be uppercase"
+                        $message = "trap keyword $text should be uppercase"
                     }
                 }
 

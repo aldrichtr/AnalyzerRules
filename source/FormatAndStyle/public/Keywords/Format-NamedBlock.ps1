@@ -61,9 +61,9 @@ function Format-NamedBlock {
             if (($Ast -is [NamedBlockAst]) -and
              ($text -imatch '^(begin|process|end|clean)')) {
                 switch ($case) {
-                    ([StringCase]::Lower) { $text | Test-LowerCase }
-                    ([StringCase]::Upper) { $text | Test-UpperCase }
-                    ([StringCase]::Capital) { $text | Test-CapitalCase }
+                    ([StringCase]::Lower) { $text | Test-Case lower }
+                    ([StringCase]::Upper) { $text | Test-Case upper }
+                    ([StringCase]::Capital) { $text | Test-Case capital }
                 }
             }
         }
@@ -81,21 +81,21 @@ function Format-NamedBlock {
 
                 :case switch ($case) {
                     ([StringCase]::Lower) {
-                        $newText = $text | ConvertTo-LowerCase
+                        $newText = $text | Convert-Case lower
                         $newExtent = $extent
-                        | New-PSScriptAnalyzerCorrection -Replacement ($newText)
+                        | New-Correction -Replacement ($newText)
                         $message = "Named block $text should be lowercase"
                     }
                     ([StringCase]::Upper) {
-                        $newText = $text | ConvertTo-UpperCase
+                        $newText = $text | Convert-Case upper
                         $newExtent = $extent
-                        | New-PSScriptAnalyzerCorrection -Replacement ($newText)
+                        | New-Correction -Replacement ($newText)
                         $message = "Named block $text should be uppercase"
                     }
                     ([StringCase]::Capital) {
-                        $newText = $text | ConvertTo-CapitalCase
+                        $newText = $text | Convert-Case capital
                         $newExtent = $extent
-                        | New-PSScriptAnalyzerCorrection -Replacement ($newText)
+                        | New-Correction -Replacement ($newText)
                         $message = "Named block $text should be uppercase"
                     }
                 }
@@ -110,7 +110,7 @@ function Format-NamedBlock {
                     SuggestedCorrections = $corrections
                 }
 
-                [void]$results.Add((New-PSScriptAnalyzerDiagnosticRecord @options))
+                [void]$results.Add((New-DiagnosticRecord @options))
             }
         } catch {
             $PSCmdlet.ThrowTerminatingError($PSItem)

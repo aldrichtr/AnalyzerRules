@@ -2,7 +2,7 @@
 using namespace System.Management.Automation.Language
 using namespace Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic
 
-function New-PSScriptAnalyzerDiagnosticRecord {
+function New-DiagnosticRecord {
     <#
     .SYNOPSIS
         Create a new DiagnosticRecord
@@ -46,7 +46,7 @@ function New-PSScriptAnalyzerDiagnosticRecord {
           before creating the Diagnostic Record
         ------------------------------------------------------------------#>
         if ($PSBoundParameters.ContainsKey('SuggestedCorrections')) {
-            $corrections = Initialize-CorrectionCollection
+            $corrections = New-CorrectionCollection
             foreach ($c in $SuggestedCorrections) {
                 [void]$corrections.Add($c)
             }

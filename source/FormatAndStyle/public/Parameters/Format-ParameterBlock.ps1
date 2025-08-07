@@ -28,8 +28,8 @@ function Format-ParameterAttributeBlock {
         #region Setup
         $ruleName = (Format-RuleName)
 
-        $results = Initialize-DiagnosticRecordCollection
-        $corrections = Initialize-CorrectionCollection
+        $results = New-DiagnosticRecordCollection
+        $corrections = New-CorrectionCollection
         $ruleArgs = Get-RuleSetting
 
         #endregion Setup

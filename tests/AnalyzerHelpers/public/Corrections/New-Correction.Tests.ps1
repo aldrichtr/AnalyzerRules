@@ -22,8 +22,8 @@ BeforeDiscovery {
 }
 
 $options = @{
-    Tag  = @( 'unit', 'Settings', 'Get', 'RuleSetting')
-    Name = 'GIVEN the public function Get-RuleSetting'
+    Tag  = @( 'unit', 'Corrections', 'New', 'PSScriptAnalyzerCorrection')
+    Name = 'GIVEN the public function New-Correction'
     Foreach = $sourceFile
 }
 Describe @options {
@@ -45,7 +45,7 @@ Describe @options {
             $parseErrors | Should -BeNullOrEmpty
         }
         It 'THEN it should load without error' {
-            (Get-Command 'Get-RuleSetting') | Should -Not -BeNullOrEmpty
+            (Get-Command 'New-Correction') | Should -Not -BeNullOrEmpty
         }
 
         It 'THEN it should contain a function' {
@@ -68,8 +68,5 @@ Describe @options {
         }
     }
     <# --=-- #>
-    Context 'WHEN called with a function name' {
-
-    }
     <# --=-- #>
 }
