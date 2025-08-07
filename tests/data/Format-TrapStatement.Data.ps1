@@ -1,1 +1,1 @@
-# trap { Write-Host "Hello World" }
+trap { Write-Host "Hello World" }

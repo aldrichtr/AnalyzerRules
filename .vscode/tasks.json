@@ -13,7 +13,7 @@
         {
             "label": "Run the unit tests",
             "type": "shell",
-            "command": "${workspaceFolder}\\.build\\tools\\runTests.ps1",
+            "command": "Invoke-Build Test",
             "group": {
                 "kind": "test",
                 "isDefault": true
@@ -31,7 +31,7 @@
         {
             "label": "Clean generated files",
             "type": "shell",
-            "command": "Invoke-Build -BuildProfile Clean"
+            "command": "Invoke-Build Clean"
         }
     ],
   "inputs": [

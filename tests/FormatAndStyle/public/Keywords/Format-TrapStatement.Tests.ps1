@@ -1,19 +1,20 @@
 using namespace System.Management.Automation.Language
 
 BeforeDiscovery {
-  if (Get-Module 'TestHelpers') {
-    $sourceFile = Get-SourceFilePath $PSCommandPath
-  } else {
-    throw 'TestHelpers module is not loaded'
-  }
+  $sourceFile = Get-SourceFilePath $PSCommandPath
+
   if (-not (Test-Path $sourceFile)) {
     throw "Could not find $sourceFile from $PSCommandPath"
   }
+
   $analyzerRules = Get-ScriptAnalyzerRule -Severity Error, Warning
   | Where-Object {
     $_.RuleName -notmatch '(^PSDSC)|Manifest'
   }
   $analysis = Invoke-ScriptAnalyzer -Path $sourceFile -IncludeRule $analyzerRules
+
+  $dataDirectory = (Get-TestDataPath $PSCommandPath)
+
 }
 
 
@@ -56,13 +57,28 @@ Describe @options {
     }
   }
 
+  Context 'When <ScriptBlock> is given to Format-TrapStatement' -ForEach @(
+    @{
+      ScriptBlock = "{ trap { Write-Host 'Hello World'}}"
+      ResultCount = 0
+    }
+  ) {
+    BeforeAll {
+      $scriptAst = ConvertTo-Ast $ScriptBlock
+      $result = Format-TrapStatement -ScriptBlockAst $scriptAst -Verbose -Debug
+    }
+    It 'It should have <ResultCount> Results' {
+      $result.Count | Should -Be $ResultCount
+    }
+  }
+
   Context 'When ScriptAnalyzer is called with <AnalyzerOptions.IncludeRule>' -ForEach @(
     @{
       AnalyzerOptions = @{
         ScriptDefinition      = "{ trap { Write-Host 'Hello World' } }"
         CustomRulePath        = 'stage'
         RecurseCustomRulePath = $true
-        IncludeDefaultRules    = $false
+        IncludeDefaultRules   = $false
         IncludeRule           = 'Format-TrapStatement'
         Settings              = @{
           Rules = @{
@@ -74,6 +90,24 @@ Describe @options {
         }
       }
       ResultCount     = 0
+    },
+    @{
+      AnalyzerOptions = @{
+        ScriptDefinition      = "{ Trap { Write-Host 'Hello World' } }"
+        CustomRulePath        = 'stage'
+        RecurseCustomRulePath = $true
+        IncludeDefaultRules   = $false
+        IncludeRule           = 'Format-TrapStatement'
+        Settings              = @{
+          Rules = @{
+            FormatTrapStatement = @{
+              Enabled = $true
+              Case    = 'lower'
+            }
+          }
+        }
+      }
+      ResultCount     = 1
     }
   ) {
     BeforeAll {
