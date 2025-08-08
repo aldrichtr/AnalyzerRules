@@ -111,7 +111,7 @@ Describe @options {
     }
   ) {
     BeforeAll {
-      $result = Invoke-ScriptAnalyzer @AnalyzerOptions
+      $result = Invoke-ScriptAnalyzer @AnalyzerOptions -Verbose -Debug
     }
     It 'It should have a result count of <ResultCount>' {
       $result.Count | Should -Be $ResultCount

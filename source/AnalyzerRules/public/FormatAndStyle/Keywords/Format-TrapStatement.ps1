@@ -26,12 +26,21 @@ function Format-TrapStatement {
 
     # TODO(Defaults): If DefaultCase Setting is set then we might not want to break if not configured
     #! break early if this rule is not configured or explicitly disabled
-    if (($null -eq $ruleArgs) -or (-not ($ruleArgs.Enabled))) { return $null }
+    if ($null -ne $ruleArgs) {
+      if (-not ($ruleArgs.Enabled)) {
+        Write-Debug "Rule is disabled in settings"
+        return $null
+      }
+    } else {
+      Write-Debug "No Settings for $($ruleName.ShortName)"
+    }
 
     if ($null -eq $ruleArgs.Case) {
-      $ruleArgs.Case = $DEFAULT_CASE
+      $case = $DEFAULT_CASE
+    } else {
+      $case = $ruleArgs.Case
     }
-    Write-Verbose "Format-TrapStatement case set to $($ruleArgs.Case)"
+    Write-Debug "Format-TrapStatement case set to $case"
 
     # case insensitive by default, so the settings can be 'lower', 'Lower', etc.
     switch -Regex ($ruleArgs.Case) {
@@ -43,26 +52,25 @@ function Format-TrapStatement {
         return $null
       }
     }
-
-    $predicate = {
-      param(
-        [Parameter()]
-        [Ast]$Ast
-      )
-      $text = $Ast.Extent.Text
-      if (($Ast -is [TrapStatementAst]) -and
-        ($text -imatch '^trap')) {
-        switch ($case) {
-          ([StringCase]::Lower) { $text | Test-Case lower }
-          ([StringCase]::Upper) { $text | Test-Case upper }
-          ([StringCase]::Capital) { $text | Test-Case capital }
-        }
-      }
-    }
   }
   process {
     try {
-      $violations = $ScriptBlockAst | Select-RuleViolation $predicate
+      $violations = $ScriptBlockAst | Select-RuleViolation -Filter {
+        param(
+          [Parameter()]
+          [Ast]$Ast
+        )
+        $text = $Ast.Extent.Text
+        if (($Ast -is [TrapStatementAst]) -and
+          ($text -imatch '^trap')) {
+          switch ($case) {
+            ([StringCase]::Lower) { $text | Test-Case lower }
+            ([StringCase]::Upper) { $text | Test-Case upper }
+            ([StringCase]::Capital) { $text | Test-Case capital }
+          }
+        }
+      }
+
       :violation foreach ($violation in $violations) {
         $extent = $violation.Extent
         $text = $extent.Text

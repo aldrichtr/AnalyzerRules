@@ -59,6 +59,9 @@ function Select-RuleViolation {
         $keys = @('First', 'Last', 'Skip')
       }
       process {
+       if ([string]::IsNullorEmpty($Filter)) {
+        throw "Select-RuleViolation did not receive a Filter"
+       }
        # --------------------------------------------------------------------------------
        # #region transfer options
        foreach ($key in $keys) {
@@ -69,9 +72,10 @@ function Select-RuleViolation {
        # #endregion transfer options
        # --------------------------------------------------------------------------------
 
+       Write-Debug "Applying $($Filter.ToString()) To $($Ast.GetType().FullName)"
         if ($selectOptions.Keys.Count -gt 0) {
             $Ast.FindAll($Filter, [bool]$Recurse)
-            | Select-Object @$selectOptions
+            | Select-Object @selectOptions
         } else {
             $Ast.FindAll($Filter, [bool]$Recurse)
         }

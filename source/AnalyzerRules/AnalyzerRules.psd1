@@ -13,7 +13,7 @@
     #---------------------------------------------------------------------------
     #region Module Components
 
-    # RootModule = ''
+    RootModule = 'AnalyzerRules.psm1'
     # ScriptsToProcess = @()
     # TypesToProcess = @()
     # FormatsToProcess = @()
