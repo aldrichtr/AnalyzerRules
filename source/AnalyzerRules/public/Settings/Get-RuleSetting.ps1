@@ -1,58 +1,58 @@
 
 using namespace Microsoft.Windows.PowerShell.ScriptAnalyzer
 function Get-RuleSetting {
-    <#
+  <#
     .SYNOPSIS
         Get the settings for the given rule
     #>
-    [CmdletBinding(
-        DefaultParameterSetName = 'one'
+  [CmdletBinding()]
+  param(
+    # The name of the function used in the Settings File
+    # If not given, then the caller's name will be used
+    [Parameter(
+      Position = 0,
+      ValueFromPipeline
     )]
-    param(
-        # The name of the function used in the Settings File
-        # If not given, then the caller's name will be used
-        [Parameter(
-            ParameterSetName = 'one',
-            ValueFromPipeline,
-            ValueFromPipelineByPropertyName
-        )]
-        [string]$Setting,
+    [string]$KeyName
+  )
+  begin {
+    $self = $MyInvocation.MyCommand
+    Write-Debug "`n$('-' * 80)`n-- Begin $($self.Name)`n$('-' * 80)"
+  }
+  process {
+    $settings = [Helper]::Instance.GetRuleArguments()
 
-        # Get the complete Settings table
-        [Parameter(
-        )]
-        [switch]$All
-
-    )
-    begin {
-        Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
-    }
-    process {
-        if ($All) {
-            [Helper]::Instance.GetRuleArguments()
-
-        } else {
-            if ($PSBoundParameters.ContainsKey('Setting')) {
-                <#------------------------------------------------------------------
-             Our function names are in `Verb-Noun` format, but our Settings
-             are going to be in the form of `VerbNoun`.  So, just in case the
-             function name was passed in, format it before we do the lookup
-            ------------------------------------------------------------------#>
-                if ($Setting -match '(\w+)-(\w+)<\w+>') {
-                    $Setting = Format-RuleName $Setting
-                    | Select-Object -ExpandProperty ShortName
-                } else {
-                    $Setting = Get-PSCallStack
-                    | Select-Object -First 1 -Skip 1
-                    | Format-RuleName
-                    | Select-Object -ExpandProperty ShortName
-                }
-                #! If the Setting is not found, this will return $null
-                [Helper]::Instance.GetRuleArguments( $Setting )
-            }
+    if (($null -ne $settings) -and
+        ($settings.Keys.Count -gt 0)) {
+      Write-Debug "Retrieved settings"
+      if ($PSBoundParameters.ContainsKey('Setting')) {
+        <#
+         # ------------------------------------------------------------------
+         # Our function names are in `Verb-Noun` format, but our Settings
+         # are going to be in the form of `VerbNoun`.  So, just in case the
+         # function name was passed in, format it before we do the lookup
+         # ------------------------------------------------------------------
+         #>
+        if ($KeyName -match '(\w+)-(\w+)<\w+>') {
+          $KeyName = Format-RuleName $KeyName
+          | Select-Object -ExpandProperty ShortName
         }
+        if ($settings.ContainsKey($KeyName)) {
+          Write-Debug "Found $KeyName in settings:"
+          Write-Debug "$($settings[$KeyName] | ConvertTo-Json)"
+          $settings[$KeyName]
+        } else {
+          Write-Debug "No setting found for $KeyName"
+        }
+      } else {
+        Write-Debug "Settings:`n$($settings | ConvertTo-Json)"
+        $settings
+      }
+    } else {
+      Write-Debug "No settings were retrieved"
     }
-    end {
-        Write-Debug "`n$('-' * 80)`n-- End $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
-    }
+  }
+  end {
+    Write-Debug "`n$('-' * 80)`n-- End $($self.Name)`n$('-' * 80)"
+  }
 }

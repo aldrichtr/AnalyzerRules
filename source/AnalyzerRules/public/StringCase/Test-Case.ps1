@@ -71,12 +71,7 @@ function Test-Case {
 
         [void]$pattern.Append($Separator)
         [void]$pattern.Append($wordCasePattern)
-        [void]$pattern.AppendJoin('', @(
-            '(',
-            $Separator,
-            $wordCasePattern,
-            ')*'
-        ))
+        [void]$pattern.Append("($Separator$wordCasePattern)*")
         [void]$pattern.Append('$')
 
         Write-Debug "Using Pattern: '$($pattern.ToString())'"

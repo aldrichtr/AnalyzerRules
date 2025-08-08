@@ -31,11 +31,11 @@ Describe @options {
     $sourceFile = $_
     Write-Debug "Testing Source file $sourceFile"
   }
-  Context 'WHEN The function is sourced in the current environment' {
+  Context 'WHEN The function is sourced in the current environment' -Tag @('fileParse') {
     BeforeAll {
       $tokens      = $null
       $parseErrors = $null
-      [Parser ]::ParseFile($sourceFile, [ref ]$tokens, [ref ]$parseErrors)
+      $result = [Parser]::ParseFile($sourceFile, [ref ]$tokens, [ref ]$parseErrors)
     }
 
     It 'THEN it should parse without error' {
@@ -46,7 +46,7 @@ Describe @options {
     }
   }
 
-  Context 'WHEN the <rule.RuleName> rule is tested' -ForEach $analyzerRules {
+  Context 'WHEN the <rule.RuleName> rule is tested' -Tag @('fileAnalysis') -ForEach $analyzerRules {
     BeforeAll {
       # Rename automatic variable to rule to make it easier to work with
       $rule = $_
@@ -59,7 +59,14 @@ Describe @options {
 
   Context 'When <ScriptBlock> is given to Format-TrapStatement' -ForEach @(
     @{
-      ScriptBlock = "{ trap { Write-Host 'Hello World'}}"
+      ScriptBlock = @'
+function Test-CaseOfTrap {
+[CmdletBinding()]
+param()
+begin {}
+process { trap { Write-Warning "Yikes, a trap!"}}
+}
+'@
       ResultCount = 0
     }
   ) {
@@ -75,7 +82,15 @@ Describe @options {
   Context 'When ScriptAnalyzer is called with <AnalyzerOptions.IncludeRule>' -ForEach @(
     @{
       AnalyzerOptions = @{
-        ScriptDefinition      = "{ trap { Write-Host 'Hello World' } }"
+        ScriptDefinition      = @'
+function Test-CaseOfTrap {
+[CmdletBinding()]
+param()
+begin {}
+process { trap { Write-Warning "Yikes, a trap!"}}
+}
+'@
+
         CustomRulePath        = 'stage'
         RecurseCustomRulePath = $true
         IncludeDefaultRules   = $false
@@ -93,7 +108,15 @@ Describe @options {
     },
     @{
       AnalyzerOptions = @{
-        ScriptDefinition      = "{ Trap { Write-Host 'Hello World' } }"
+        ScriptDefinition      = @'
+function Test-CaseOfTrap {
+[CmdletBinding()]
+param()
+begin {}
+process { Trap { Write-Warning "Yikes, a trap!"}}
+}
+'@
+
         CustomRulePath        = 'stage'
         RecurseCustomRulePath = $true
         IncludeDefaultRules   = $false
@@ -111,7 +134,7 @@ Describe @options {
     }
   ) {
     BeforeAll {
-      $result = Invoke-ScriptAnalyzer @AnalyzerOptions -Verbose -Debug
+      $result = Invoke-ScriptAnalyzer @AnalyzerOptions
     }
     It 'It should have a result count of <ResultCount>' {
       $result.Count | Should -Be $ResultCount

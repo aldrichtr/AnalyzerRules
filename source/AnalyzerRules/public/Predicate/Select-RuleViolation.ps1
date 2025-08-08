@@ -56,28 +56,28 @@ function Select-RuleViolation {
     begin {
         Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
         $selectOptions = @{ }
-        $keys = @('First', 'Last', 'Skip')
       }
       process {
        if ([string]::IsNullorEmpty($Filter)) {
         throw "Select-RuleViolation did not receive a Filter"
        }
        # --------------------------------------------------------------------------------
-       # #region transfer options
-       foreach ($key in $keys) {
+       # # SECTION transfer options
+       foreach ($key in @('First', 'Last', 'Skip')) {
         if ($PSBoundParameters.ContainsKey($key)) {
             $selectOptions[$key] = $PSBoundParameters[$key]
         }
        }
-       # #endregion transfer options
+       # # !SECTION transfer options
        # --------------------------------------------------------------------------------
 
        Write-Debug "Applying $($Filter.ToString()) To $($Ast.GetType().FullName)"
+       $result = $Ast.FindAll($Filter, [bool]$Recurse)
+       Write-Debug "Results: $($result | ConvertTo-Json)"
         if ($selectOptions.Keys.Count -gt 0) {
-            $Ast.FindAll($Filter, [bool]$Recurse)
-            | Select-Object @selectOptions
+          return ($result | Select-Object @selectOptions)
         } else {
-            $Ast.FindAll($Filter, [bool]$Recurse)
+            return $result
         }
     }
     end {
