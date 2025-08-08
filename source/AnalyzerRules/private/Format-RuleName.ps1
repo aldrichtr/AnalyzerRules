@@ -12,8 +12,10 @@ function Format-RuleName {
       - Measure
         : Functions that analyze the source for context.  These may or may not alter source code, but will warn when
         the rule is violated.
-    .EXAMPLE
-
+    .NOTES
+      - Format-LanguageComponent => FormatLanguageComponent
+      - Format-PlaceSquareBracket => PlaceSquareBracket   ! the word Place is significant
+      - Measure-LanguageComponent => LanguageComponent
     #>
   [CmdletBinding()]
   param(
@@ -22,29 +24,35 @@ function Format-RuleName {
       ValueFromPipeline,
       ValueFromPipelineByPropertyName
     )]
-    [string]$FunctionName
+    [string]$Name
   )
   begin {
     Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
   }
   process {
-    if ([string]::IsNullorEmpty($FunctionName)) {
+    if ([string]::IsNullorEmpty($Name)) {
+      Write-Debug 'No Name given.  Looking at Caller info'
       $callStack = Get-PSCallStack
-      $FunctionName =  $callStack[0].FunctionName
+      $Name =  $callStack[1].Name
+      Write-Debug "Callers name is $Name"
     }
-    # remove angle brackets if present
-    $fullName = $FunctionName -replace '<(.*)>$', '$1'
+
+    <#
+      When we get the caller's name, it might come back with a <NamedBlock> (Begin, Process, End) on the end, so we
+      want to remove that and then split on the '-' in a Verb-Noun style Function
+    #>
+    $fullName = $Name -replace '<.*>$', ''
     $verb, $noun = $fullName -split '-', 2
 
+    Write-Debug "- Verb: $verb , Noun: $noun"
     switch -Regex ($verb) {
       '^Format' {
-        # A rule function that is intended to format PowerShell source
         switch -Regex ($noun) {
           '^Place' {
             $shortName = $noun
           }
           default {
-            $shortName = ($verb, $noun) -join ''
+            $shortName = @($verb, $noun) -join ''
           }
         }
       }
@@ -53,14 +61,18 @@ function Format-RuleName {
           default { $shortName = $noun }
         }
       }
+      default {
+        $shortName = @($verb, $noun) -join ''
+      }
     }
+    Write-Debug "Short name set to: $shortName"
 
     [PSCustomObject]@{
-      PSTypeName   = 'Analyzer.RuleName'
-      FunctionName = $FunctionName
-      ShortName    = $shortName
-      Verb         = $verb
-      Noun         = $noun
+      PSTypeName = 'Analyzer.RuleName'
+      Name       = $Name
+      ShortName  = $shortName
+      Verb       = $verb
+      Noun       = $noun
     }
   }
   end {

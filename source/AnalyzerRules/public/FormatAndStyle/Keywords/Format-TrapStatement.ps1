@@ -13,60 +13,70 @@ function Format-TrapStatement {
     [Parameter(
       Mandatory
     )]
-    [ScriptBlockAst]$ScriptBlockAst
+    [TrapStatementAst]$TrapStatementAst
   )
   begin {
+    $self = $MyInvocation.MyCommand
     Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
-    $DEFAULT_CASE = 'lower'
+    $DEFAULT_CASE = [StringCase]::Lower
 
-    $ruleName = (Format-RuleName)
-    $results = New-DiagnosticRecordCollection
+    $ruleName    = $self | Format-RuleName
+    $results     = New-DiagnosticRecordCollection
     $corrections = New-CorrectionCollection
-    $ruleArgs = Get-RuleSetting
+    $ruleArgs    = Get-RuleSetting $ruleName.ShortName
 
     # TODO(Defaults): If DefaultCase Setting is set then we might not want to break if not configured
-    #! break early if this rule is not configured or explicitly disabled
+    #! break early if this rule is explicitly disabled
     if ($null -ne $ruleArgs) {
-      if (-not ($ruleArgs.Enabled)) {
-        Write-Debug "Rule is disabled in settings"
+      if (($ruleArgs.ContainsKey('Enabled')) -and
+          ($ruleArgs.Enabled -eq $false)) {
+        Write-Debug 'Rule is disabled in settings'
+        <#! The Rule is not enabled so we return from the function #>
         return $null
+      } else {
+        # rule is enabled
+        if ($ruleArgs.ContainsKey('Case')) {
+          # case insensitive by default, so the settings can be 'lower', 'Lower', etc.
+          switch -Regex ($ruleArgs.Case) {
+            '^low' { $case = [StringCase]::Lower }
+            '^up' { $case = [StringCase]::Upper }
+            '^cap' { $case = [StringCase]::Capital }
+            default {
+              Write-Verbose "'$($ruleArgs.Case)' is not a valid setting.  Use 'lower', 'upper', or 'capital'"
+              return $null
+            }
+          }
+        }
       }
     } else {
       Write-Debug "No Settings for $($ruleName.ShortName)"
+      $case = $DEFAULT_CASE
     }
 
-    if ($null -eq $ruleArgs.Case) {
-      $case = $DEFAULT_CASE
-    } else {
-      $case = $ruleArgs.Case
-    }
     Write-Debug "Format-TrapStatement case set to $case"
 
-    # case insensitive by default, so the settings can be 'lower', 'Lower', etc.
-    switch -Regex ($ruleArgs.Case) {
-      '^low' { $case = [StringCase]::Lower }
-      '^up' { $case = [StringCase]::Upper }
-      '^cap' { $case = [StringCase]::Capital }
-      default {
-        Write-Verbose "'$($ruleArgs.Case)' is not a valid setting.  Use 'lower', 'upper', or 'capital'"
-        return $null
-      }
-    }
   }
   process {
     try {
-      $violations = $ScriptBlockAst | Select-RuleViolation -Filter {
+      $violations = $TrapStatementAst | Select-RuleViolation -Filter {
         param(
-          [Parameter()]
-          [Ast]$Ast
+          [Parameter()][Ast]$Ast
         )
         $text = $Ast.Extent.Text
+        Write-Debug "Received AST $($Ast.GetType().FullName):"
+        Write-Debug "- with Text '$text'"
         if (($Ast -is [TrapStatementAst]) -and
-          ($text -imatch '^trap')) {
+        ($text -imatch '^trap')) {
+            Write-Debug "Validating case of '$text'"
           switch ($case) {
-            ([StringCase]::Lower) { $text | Test-Case lower }
-            ([StringCase]::Upper) { $text | Test-Case upper }
-            ([StringCase]::Capital) { $text | Test-Case capital }
+            ([StringCase]::Lower) {
+              return ($text | Test-Case lower)
+            }
+            ([StringCase]::Upper) {
+              return ($text | Test-Case upper)
+             }
+            ([StringCase]::Capital) {
+              return ($text | Test-Case capital) }
           }
         }
       }
@@ -99,8 +109,8 @@ function Format-TrapStatement {
             $message = "trap keyword $text should be uppercase"
           }
         }
-
         [void]$corrections.Add($newExtent)
+
         $options = @{
           RuleName             = $ruleName
           SuppressionId        = $ruleName
@@ -112,11 +122,12 @@ function Format-TrapStatement {
 
         [void]$results.Add((New-DiagnosticRecord @options))
       }
+      return $results
     } catch {
       $PSCmdlet.ThrowTerminatingError($PSItem)
     }
   }
   end {
-    $results
+      Write-Debug "`n$('-' * 80)`n-- End $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
   }
 }

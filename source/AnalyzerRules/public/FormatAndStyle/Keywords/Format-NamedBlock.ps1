@@ -7,8 +7,10 @@ function Format-NamedBlock {
     .SYNOPSIS
         Ensure Named script blocks (Begin, Process, etc...) are in the case given in the FormatNamedBlock setting.
     .DESCRIPTION
-        The named blocks in a function are `begin`, `process`, `end`, `clean`.  There are three types of 'case'
-        settings that can be configured in the Settings file under FormatNamedBlock, `lower`, `upper`, `capital`
+        Format the case of named blocks in a function (`begin`, `process`, `end`, `clean`).
+    .NOTES
+        There are three types of 'case' settings that can be configured in the Settings file under FormatNamedBlock,
+        `lower`, `upper`, `capital`
         ```powershell
         Rules = @{
             FormatNamedBlock = @{
@@ -28,7 +30,8 @@ function Format-NamedBlock {
         [ScriptBlockAst]$ScriptBlockAst
     )
     begin {
-        $DEFAULT_BLOCK_CASE = 'lower'
+
+        $DEFAULT_BLOCK_CASE = [StringCase]::Lower
 
         $ruleName = (Format-RuleName)
         $results = New-ResultsCollection
@@ -50,8 +53,7 @@ function Format-NamedBlock {
                 return $null
             }
         }
-
-
+        # SECTION - Filter
         $predicate = {
             param(
                 [Parameter()]
@@ -67,6 +69,7 @@ function Format-NamedBlock {
                 }
             }
         }
+        # !SECTION - Filter
     }
     process {
         try {

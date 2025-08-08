@@ -25,18 +25,18 @@ function Format-ParameterAttributeBlock {
     )
     begin {
         #-------------------------------------------------------------------------------
-        #region Setup
+        # SECTION Setup
         $ruleName = (Format-RuleName)
 
         $results = New-DiagnosticRecordCollection
         $corrections = New-CorrectionCollection
         $ruleArgs = Get-RuleSetting
 
-        #endregion Setup
+        # !SECTION Setup
         #-------------------------------------------------------------------------------
 
         #-------------------------------------------------------------------------------
-        #region defaults
+        # SECTION defaults
 
         <#
          The default setting is to separate Arguments on separate lines:
@@ -77,7 +77,7 @@ function Format-ParameterAttributeBlock {
             'HelpMessageBaseName',
             'HelpMessageResourceId'
         )
-        #endregion defaults
+        # !SECTION defaults
         #-------------------------------------------------------------------------------
 
         if ($null -ne $ruleArgs) {
@@ -116,7 +116,7 @@ function Format-ParameterAttributeBlock {
             }
         }
         $listJoinCharacter = ",$separator"
-        #endregion RuleSettings
+        # !SECTION RuleSettings
         #-------------------------------------------------------------------------------
 
         $findParameter = {
