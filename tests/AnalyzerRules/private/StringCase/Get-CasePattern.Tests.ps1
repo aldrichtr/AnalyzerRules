@@ -23,7 +23,7 @@ BeforeDiscovery {
 
 $options = @{
   Tag     = @( 'unit', 'StringCase', 'Get', 'CasePattern')
-  Name    = 'GIVEN the public function Get-CasePattern'
+  Name    = 'GIVEN the private function Get-CasePattern'
   Foreach = $sourceFile
 }
 Describe @options {
@@ -46,9 +46,7 @@ Describe @options {
     }
 
     It 'THEN it should load without error' {
-      InModuleScope -ModuleName AnalyzerRules {
-        (Get-Command 'Get-CasePattern') | Should -Not -BeNullOrEmpty
-      }
+      (Get-Command 'Get-CasePattern') | Should -Not -BeNullOrEmpty
     }
 
     It 'THEN it should contain a function' {
@@ -72,20 +70,16 @@ Describe @options {
   }
   <# --=-- #>
 
-  Context 'WHEN the word case is <WordCase> and DontAllowDigits is <DontAllowDigits>' -Foreach (
+  Context 'WHEN the word case is <WordCase> and DontAllowDigits is <DontAllowDigits>' -ForEach (
     Get-ChildItem $dataDirectory -Filter *.psd1
     | ForEach-Object { Import-Psd $_ }
   ) {
     BeforeEach {
-      InModuleScope -ModuleName AnalyzerRules -Parameters $_ {
-        $result = Get-CasePattern $WordCase -DontAllowDigits:$DontAllowDigits
-      }
+      $result = Get-CasePattern $WordCase -DontAllowDigits:$DontAllowDigits
     }
 
     It 'THEN the pattern should be <Expect>' {
-      InModuleScope -ModuleName AnalyzerRules  {
-        $result | Should -BeExactly $Expect
-      }
+      $result | Should -BeExactly $Expect
     }
   }
   <# --=-- #>

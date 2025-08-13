@@ -16,7 +16,7 @@ using namespace System.Diagnostics.CodeAnalysis
 
 
 #-------------------------------------------------------------------------------
-#region Rule suppression
+# SECTION Rule suppression
 
         [SuppressMessage('PSUseDeclaredVarsMoreThanAssignments', 'ProfilePath', Justification = 'Variable used in Invoke-Build scripts')]
         [SuppressMessage('PSUseDeclaredVarsMoreThanAssignments', 'BuildProfile', Justification = 'Variable used in Invoke-Build scripts')]
@@ -90,12 +90,12 @@ using namespace System.Diagnostics.CodeAnalysis
         [SuppressMessage('PSUseDeclaredVarsMoreThanAssignments', 'Output', Justification = 'Variable used in Invoke-Build scripts')]
         [SuppressMessage('PSUseDeclaredVarsMoreThanAssignments', 'SkipBuildHeader', Justification = 'Variable used in Invoke-Build scripts')]
 
-#endregion Rule suppression
+# !SECTION Rule suppression
 #-------------------------------------------------------------------------------
 
 param()
 #-------------------------------------------------------------------------------
-#region Profile
+# SECTION Profile
 
 <#
  The base path to configuration and settings files
@@ -126,11 +126,11 @@ $DefaultBuildProfile = (
     Get-BuildProperty DefaultBuildProfile 'default'
 )
 
-#endregion Profile
+# !SECTION Profile
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Path
+# SECTION Path
 
 <#
  The file name of the configuration file
@@ -194,11 +194,11 @@ $SourceTypeMap = (
 }
 )
 
-#endregion Path
+# !SECTION Path
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Tasks
+# SECTION Tasks
 <#
  Do not import tasks from the Stitch module.  This can be used to bypass the import for debug/testing purposes
 #>
@@ -218,11 +218,11 @@ $BuildInfo = (
 }
 )
 
-#endregion Tasks
+# !SECTION Tasks
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Clean
+# SECTION Clean
 <#
  Paths that should not be deleted when `Clean` is run.  By default everything in`$Staging` and `$Artifact` are removed
 #>
@@ -230,11 +230,11 @@ $ExcludePathFromClean = (
     Get-BuildProperty ExcludePathFromClean @( "$Artifact\logs*" , "$Artifact\backup*")
 )
 
-#endregion Clean
+# !SECTION Clean
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Validate
+# SECTION Validate
 <#
  Do not check for module dependencies (PSDepend)
 #>
@@ -256,11 +256,11 @@ $RequiredModules = (
     Get-BuildProperty RequiredModules @{}
 )
 
-#endregion Validate
+# !SECTION Validate
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Test
+# SECTION Test
 <#
  Produce codecoverage metrics when running Pester tests
 #>
@@ -331,11 +331,11 @@ $PesterResultFile = (
     Get-BuildProperty PesterResultFile "pester.{Type}.result.-$(Get-Date -Format FileDateTimeUniversal).clixml"
 )
 
-#endregion Test
+# !SECTION Test
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Build
+# SECTION Build
 <#
  Additional paths in the `$Source` directory that should be copied to `$Staging`
  Each key of this hashtable is a module name of your project whose value is a hashtable of Source = Staging paths
@@ -516,11 +516,11 @@ $ProjectVersionField = (
     Get-BuildProperty ProjectVersionField MajorMinorPatch
 )
 
-#endregion Build
+# !SECTION Build
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Publish
+# SECTION Publish
 <#
  The path to the project's changelog (if any)
 #>
@@ -622,11 +622,11 @@ $ReleaseNotesFile = (
     Get-BuildProperty ReleaseNotesFile ReleaseNotes.md
 )
 
-#endregion Publish
+# !SECTION Publish
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Install
+# SECTION Install
 <#
  Location to save the modules to (copy from staging) See the `install.module.saveto` task
 #>
@@ -648,11 +648,11 @@ $InstallModuleFromPsRepo = (
     Get-BuildProperty InstallModuleFromPsRepo $BuildInfo.Project.Name
 )
 
-#endregion Install
+# !SECTION Install
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Logging
+# SECTION Logging
 <#
  The path to write the build log to. LogPath and LogFile are combined at runtime to determine the path to the build log
 #>
@@ -715,5 +715,5 @@ $SkipBuildHeader = (
     Get-BuildProperty SkipBuildHeader $false
 )
 
-#endregion Logging
+# !SECTION Logging
 #-------------------------------------------------------------------------------

@@ -13,9 +13,15 @@ class RuleCategory : Attribute {
   [hashtable] Settings() {
     $setting = Get-RuleSetting $this.Name
     if ($null -eq $setting) {
-      $setting = @{}
+      $setting = $null
     }
-
     return $setting
   }
+
+    [void] Settings([hashtable]$s) {
+      $mySettings = @{}
+      $mySettings[$this.Name] = $s
+      $mySettings | Add-RuleSetting
+    }
+
 }

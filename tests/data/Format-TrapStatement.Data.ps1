@@ -1,1 +1,4 @@
-trap { Write-Host "Hello World" }
+function Test-Foo {
+  param()
+  TRAP { Write-Host "Hello World" }
+}

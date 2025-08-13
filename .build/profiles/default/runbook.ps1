@@ -3,7 +3,7 @@ Use this file to manage the phases and tasks.
 #>
 
 #-------------------------------------------------------------------------------
-#region Lifecycle phases for default
+# SECTION Lifecycle phases for default
 'Validate'   | before 'Initialize'
 'Initialize' | before 'Compile'
 'Compile'    | before 'Test'
@@ -11,13 +11,13 @@ Use this file to manage the phases and tasks.
 'Build'      | before 'Verify'
 'Verify'     | before 'Package'
 'Package'    | before 'Install'
-#endregion Lifecycle phases for default
+# !SECTION Lifecycle phases for default
 #-------------------------------------------------------------------------------
 
 Add-BuildTask . 'Build'
 
 #-------------------------------------------------------------------------------
-#region Validate
+# SECTION Validate
 
 'Validate' | jobs @(
     'confirm.project.directory',
@@ -25,11 +25,11 @@ Add-BuildTask . 'Build'
     'confirm.logging.directory',
     'confirm.module.directory')
 
-#endregion Validate
+# !SECTION Validate
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Initialize
+# SECTION Initialize
 
 'install.psdepend' | before 'install.requirement'
 
@@ -38,18 +38,18 @@ Add-BuildTask . 'Build'
     'install.requirement',
     'set.psmodulepath'
 )
-#endregion Initialize
+# !SECTION Initialize
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Compile
+# SECTION Compile
 
 
-#endregion Compile
+# !SECTION Compile
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Test
+# SECTION Test
 
 
 $unitTestOptions = @{
@@ -68,11 +68,11 @@ Remove-Variable unitTestOptions
     Import-Module (Join-Path $Tests 'TestHelpers.psm1') -Force
 }, 'unit.tests'
 
-#endregion Test
+# !SECTION Test
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Build
+# SECTION Build
 
 task 'write.module' @(
     'write.module.file',
@@ -97,11 +97,11 @@ task 'write.manifest' @(
     'copy.additional.item'
 )
 
-#endregion Build
+# !SECTION Build
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Verify
+# SECTION Verify
 
 # synopsis: Run the tests defined in the 'IntegrationTests' config file
 pester integration.tests -ConfigurationFile "$BuildConfigPath\pester\IntegrationTests.config.psd1" -Type 'Integration'
@@ -111,24 +111,24 @@ pester integration.tests -ConfigurationFile "$BuildConfigPath\pester\Integration
     Import-Module (Join-Path $Tests 'TestHelpers.psm1') -Force
 }, 'integration.tests'
 
-#endregion Verify
+# !SECTION Verify
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Package
+# SECTION Package
 
 'register.project.psrepo' | before 'compress.nuget.package'
 'unregister.project.psrepo' | after 'compress.nuget.package'
 
 'Package' | jobs 'compress.nuget.package'
 
-#endregion Package
+# !SECTION Package
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-#region Install
+# SECTION Install
 
 'Install' | jobs 'install.module.currentuser'
 
-#endregion Install
+# !SECTION Install
 #-------------------------------------------------------------------------------
