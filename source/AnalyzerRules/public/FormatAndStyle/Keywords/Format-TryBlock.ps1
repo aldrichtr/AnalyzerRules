@@ -18,6 +18,7 @@ function Format-TryBlock {
         }
         ```
     #>
+    [RuleCategory("FormatKeyword")]
     [CmdletBinding()]
     [OutputType([DiagnosticRecord[]])]
     param(
@@ -29,31 +30,10 @@ function Format-TryBlock {
     )
     begin {
         #TODO(Defaults): Add a DefaultCase Setting somewhere appropriate
-        $DEFAULT_BLOCK_CASE = 'lower'
 
         $ruleName = (Format-RuleName)
-        $results = New-DiagnosticRecordCollection
-        $corrections = New-CorrectionCollection
-        $ruleArgs = Get-RuleSetting
 
-        # TODO(Defaults): If DefaultCase Setting is set then we might not want to break if not configured
-        #! break early if this rule is not configured or explicitly disabled
-        if (($null -eq $ruleArgs) -or (-not ($ruleArgs.Enabled))) { return $null }
 
-        if ($null -eq $ruleArgs.Case) {
-            $ruleArgs.Case = $DEFAULT_BLOCK_CASE
-        }
-
-        # case insensitive by default, so the settings can be 'lower', 'Lower', etc.
-        switch -Regex ($ruleArgs.Case) {
-            '^low' { $case = [StringCase]::Lower }
-            '^up' { $case = [StringCase]::Upper }
-            '^cap' { $case = [StringCase]::Capital }
-            default {
-                Write-Verbose "'$($ruleArgs.Case)' is not a valid setting.  Use 'lower', 'upper', or 'capital'"
-                return $null
-            }
-        }
 
         $predicate = {
             param(
@@ -61,13 +41,8 @@ function Format-TryBlock {
                 [Ast]$Ast
             )
             $text = $Ast.Extent.Text
-            if (($Ast -is [TryStatementAst]) -and
-             ($text -imatch '^(begin|process|end|clean)')) {
-                switch ($case) {
-                    ([StringCase]::Lower) { $text | Test-Case lower }
-                    ([StringCase]::Upper) { $text | Test-Case upper }
-                    ([StringCase]::Capital) { $text | Test-Case capital }
-                }
+            if ($Ast -is [TryStatementAst]) {
+              <#TODO: test case#>return $true
             }
         }
     }

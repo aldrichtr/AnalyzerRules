@@ -1,10 +1,7 @@
 @{
   IncludeDefaultRules = $false
 
-  CustomRulePath      = @(
-    '.\stage\AnalyzerHelpers',
-    '.\stage\FormatAndStyle'
-  )
+  CustomRulePath      = @( '.\stage\AnalyzerRules')
 
   IncludeRules        = @(
     'Format-TrapStatement'

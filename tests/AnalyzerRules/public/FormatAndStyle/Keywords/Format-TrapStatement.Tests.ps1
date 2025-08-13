@@ -1,3 +1,4 @@
+
 using namespace System.Management.Automation.Language
 
 BeforeDiscovery {
@@ -22,14 +23,14 @@ $options = @{
   Name    = 'GIVEN the public function Format-TrapStatement'
   Tag     = @(
     'unit',
-    'Format-TrapStatement'
+    'Format',
+    'TrapStatement'
   )
   Foreach = $sourceFile
 }
 Describe @options {
   BeforeAll {
     $sourceFile = $_
-    Write-Debug "Testing Source file $sourceFile"
   }
   Context 'WHEN The function is sourced in the current environment' -Tag @('fileParse') {
     BeforeAll {
@@ -57,22 +58,26 @@ Describe @options {
     }
   }
 
-  Context 'When <ScriptBlock> is given to Format-TrapStatement' -ForEach @(
+  <# --=-- #>
+  Context 'GIVEN that we pass a scriptblock to Format-TrapStatement outside ScriptAnalyzer' -Tag @("Raw") -ForEach @(
     @{
       ScriptBlock = @'
-function Test-CaseOfTrap {
-[CmdletBinding()]
-param()
-begin {}
-process { trap { Write-Warning "Yikes, a trap!"}}
-}
+{ TRAP { Write-Warning "Yikes, a trap!"}}
 '@
-      ResultCount = 0
+      ResultCount = 1
     }
   ) {
     BeforeAll {
+      Mock Get-RuleSetting -ModuleName AnalyzerRules -MockWith {
+        return @{
+          Enabled = $true
+          Case    = 'lower'
+        }
+      }
+
       $scriptAst = ConvertTo-Ast $ScriptBlock
-      $result = Format-TrapStatement -ScriptBlockAst $scriptAst -Verbose -Debug
+      $trapAst = $scriptAst.Find({ param($ast) $ast -is [TrapStatementAst] }, $true)
+      $result = Format-TrapStatement -TrapStatementAst $trapAst
     }
     It 'It should have <ResultCount> Results' {
       $result.Count | Should -Be $ResultCount
@@ -87,10 +92,9 @@ function Test-CaseOfTrap {
 [CmdletBinding()]
 param()
 begin {}
-process { trap { Write-Warning "Yikes, a trap!"}}
+process { Trap { Write-Warning "Yikes, a trap!"}}
 }
 '@
-
         CustomRulePath        = 'stage'
         RecurseCustomRulePath = $true
         IncludeDefaultRules   = $false
@@ -104,19 +108,18 @@ process { trap { Write-Warning "Yikes, a trap!"}}
           }
         }
       }
-      ResultCount     = 0
+      ResultCount     = 1
     },
     @{
       AnalyzerOptions = @{
         ScriptDefinition      = @'
-function Test-CaseOfTrap {
+function Test-CaseOfTrap1 {
 [CmdletBinding()]
 param()
 begin {}
-process { Trap { Write-Warning "Yikes, a trap!"}}
+process { TRAP { Write-Warning "Yikes, a trap!"}}
 }
 '@
-
         CustomRulePath        = 'stage'
         RecurseCustomRulePath = $true
         IncludeDefaultRules   = $false
@@ -133,12 +136,15 @@ process { Trap { Write-Warning "Yikes, a trap!"}}
       ResultCount     = 1
     }
   ) {
-    BeforeAll {
+    BeforeEach {
       $result = Invoke-ScriptAnalyzer @AnalyzerOptions
     }
+
     It 'It should have a result count of <ResultCount>' {
       $result.Count | Should -Be $ResultCount
     }
 
   }
+
+  <# --=-- #>
 }
