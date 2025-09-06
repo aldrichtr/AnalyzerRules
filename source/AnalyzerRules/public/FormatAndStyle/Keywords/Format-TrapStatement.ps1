@@ -8,8 +8,12 @@ using namespace Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic
 function Format-TrapStatement {
   <#
 .SYNOPSIS
-  Format the `trap` keyword using UPPER, lower, or Capital case.
-.INPUTS
+  Ensure the `trap` keyword in in the case given in `FormatTrapStatement` setting.
+.DESCRIPTION
+  Format the `trap` keyword using UPPER, lower, or Capital case, according to the `Case` setting. This rule is part of the `FormatKeyword` category.
+  Settings for `FormatTrapStatement` and `FormatKeyword` are both evaluated.
+  See details in the docs under *Settings that affect rules*
+ .INPUTS
   [System.Management.Automation.Language.TrapStatementAst]
 .OUTPUTS
   [Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic.DiagnosticRecord[]]
@@ -18,28 +22,15 @@ function Format-TrapStatement {
   [CmdletBinding()]
   param(
     [Parameter( Mandatory)]
-    [TrapStatementAst]$TrapStatementAst
+    [TrapStatementAst]$InputAst
   )
   begin {
-    $self = $MyInvocation.MyCommand
-    Write-Debug "`n$('-' * 80)`n-- Begin $($self.Name)`n$('-' * 80)"
-    $ruleName    = $self | Format-RuleName | Select-Object -ExpandProperty ShortName
-
-    $case        = [StringCase]::None
-
-
-    # TODO[epic=Debugging]: When run under ScriptAnalyzer, there is no Debug output, so is Write-Debug even helpful here?
-    # TODO[epic=Defaults]: If DefaultCase Setting is set then we might not want to break if not configured
+    $self           = $MyInvocation.MyCommand
+    $ruleName       = $self | Format-RuleName | Select-Object -ExpandProperty ShortName
+    $keywordPattern = '(trap)'
+    $case           = [StringCase]::None
 
     # SECTION Settings
-
-    <# NOTE: Settings process
-    Settings can be set for an entire Rule Category, which will act as the defaults for all rules in the category.
-    Any settings that are set explicitly on a Rule takes precedence over the category settings.
-
-    Since this rule tests for the case of the keyword to conform with the Case setting, then we abort the rule if we
-    cannot determine the Case.
-    #>
 
     # SECTION Category Settings
     $category = Get-RuleCategory $self.Name
@@ -55,19 +46,15 @@ function Format-TrapStatement {
     # SECTION Explicit Rule Settings
     $settings    = Get-RuleSetting $ruleName
     if ($null -eq $settings) {
-      Write-Debug "There are no settings for rule $ruleName."
     } else {
       #!! There are rule settings
       if (-not ($settings.ContainsKey('Enabled'))) {
-        Write-Debug "Rule settings exist, but do not contain 'Enabled'.  Aborting"
         return $null
       } else {
         if ($settings.Enabled -eq $false) {
-          Write-Debug 'Rule is explicitly disabled in settings.  Aborting'
           <#! The Rule is not enabled so we return from the function #>
           return $null
         } else {
-          Write-Debug 'Rule is explicitly enabled in settings.'
           if ($settings.ContainsKey('Case')) {
             $case = $settings.Case | ConvertTo-StringCaseType
           }
@@ -78,27 +65,25 @@ function Format-TrapStatement {
 
     # !SECTION Settings
 
-    Write-Debug "Format-TrapStatement case set to $case"
 
     # SECTION Predicate definition
     [scriptblock]$predicate = {
       param($ast)
-      $astMatchesPredicate = $false
+
+      $doesAstMatchPredicate = $false
+      $doesKeywordMatchCase  = $false
+
       if ($ast -is [TrapStatementAst]) {
-        $null = $ast.Extent.Text -imatch '(trap)'
+        $null = $ast.Extent.Text -imatch $keywordPattern
         $keyword = ${Matches}?.1
-        if ($null -eq $keyword) {
-          $astMatchesPredicate = $false
-          Write-Debug "Something went wrong, cant find 'trap' keyword in text"
-          return $astMatchesPredicate
-        }
-        $keywordMatchesCase = ($keyword | Test-Case $case.ToString())
+        $doesAstMatchPredicate = ($null -ne $keyword)
+        $doesKeywordMatchCase = ($keyword | Test-Case $case.ToString())
 
         # NOTE: We only want to match on violations, so the filter Should only match on TrapStatementAsts that are
         # not in the right case.
-        $astMatchesPredicate = (-not $keywordMatchesCase)
+        $doesAstMatchPredicate = (-not $doesKeywordMatchCase)
       }
-      return $astMatchesPredicate
+      return $doesAstMatchPredicate
     }
     # !SECTION
 
@@ -107,24 +92,19 @@ function Format-TrapStatement {
   process {
     # NOTE: One last sanity check before we start the process
     if ($case -eq [StringCase]::None) {
-      Write-Debug 'Case was not set, cannot continue'
       return $null
     }
 
     # SECTION Find violations
-    if ($null -eq $predicate ) {
-      throw "Predicate scriptblock was not created"
-    }
 
     try {
-      $violations = $TrapStatementAst | Select-RuleViolation -Filter $predicate
+      $violations = $InputAst | Select-RuleViolation $predicate
     } catch {
       throw "There was an error while trying to find violations`n$_"
     }
     # !SECTION
 
     if ($violations.Count -gt 0) {
-      Write-Debug "There were $($violations.Count) violations found"
       $results = New-DiagnosticRecordCollection
     }
 
@@ -133,23 +113,21 @@ function Format-TrapStatement {
       $text = $extent.Text
       # SECTION Isolate keyword
 
-      $null = $text -imatch '^(trap)(.*)'
-      $trapWord = ${Matches}?.1
+      $null = $text -imatch "^$keywordPattern(.*)"
+      $keyword = ${Matches}?.1
       $remainingText = ${Matches}?.2
 
-      Write-Debug "Separating keyword '$trapWord' from body '$remainingText'"
       # !SECTION Isolate keyword
 
       # SECTION Create Correction
-      $newCase = $trapWord | Convert-Case $case.ToString()
-      $message = "keyword $trapWord should be $($case.ToString())"
+      $correctedKeyword = $keyword | Convert-Case $case.ToString()
+      $message = "keyword $keyword should be $($case.ToString())"
 
-      $replacement = ('{0}{1}' -f $newCase, $remainingText)
-      Write-Debug "- Correction is: '$replacement'`n  Message: '$message'"
+      $replacement = ('{0}{1}' -f $correctedKeyword, $remainingText)
 
       $correctionOptions = @{
         ReplacementText = $replacement
-        Description     = "Set trap keyword to $($case.ToString())"
+        Description     = "Set keyword to $($case.ToString())"
       }
 
       $correction = $extent | New-Correction @correctionOptions
@@ -157,10 +135,7 @@ function Format-TrapStatement {
       # !SECTION Create Correction
 
       # SECTION Create Record
-
-      $message = "$message`nThere are $($results.Count) results in the collection"
-
-      $options = @{
+      $recordOptions = @{
         RuleName             = $ruleName
         Extent               = $violation.Extent
         Message              = $message
@@ -168,7 +143,7 @@ function Format-TrapStatement {
       }
 
       try {
-        $record = New-DiagnosticRecord @options
+        $record = New-DiagnosticRecord @recordOptions
       } catch {
         throw "There was an error creating the results`n$_"
       }
@@ -183,8 +158,6 @@ function Format-TrapStatement {
     }
   }
   end {
-    Write-Debug "There were $($results.Count) violations of $ruleName"
     return $results
-    Write-Debug "`n$('-' * 80)`n-- End $($self.Name)`n$('-' * 80)"
   }
 }
