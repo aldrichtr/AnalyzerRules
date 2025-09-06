@@ -4,7 +4,7 @@
         # Directories to be searched for tests, paths directly to test files, or combination of
         # both.'
         Path                   = @(
-            './tests/Unit'
+            './tests'
         )
 
         # Default @()
@@ -172,9 +172,9 @@
         # everything.'
         WriteDebugMessagesFrom = @(
             'Discovery'
-            'Skip'
-            'Mock'
-            'CodeCoverage'
+            # 'Skip'
+            # 'Mock'
+            # 'CodeCoverage'
         )
 
         # Default $false
@@ -190,11 +190,11 @@
     Output       = @{
         # Default 'Normal'
         # The verbosity of output, options are None, Normal, Detailed and Diagnostic.'
-        Verbosity           = 'Detailed'
+        Verbosity           = 'Normal'
 
         # Default 'Filtered'
         # The verbosity of stacktrace output, options are None, FirstLine, Filtered and Full.'
-        StackTraceVerbosity = 'None'
+        StackTraceVerbosity = 'Filtered'
 
         # Default 'Auto'
         # The CI format of error output in build logs, options are None, Auto, AzureDevops and
