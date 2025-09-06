@@ -91,7 +91,7 @@ Describe @options {
         throw "$scriptBlockFile is not a valid path"
       }
 
-      $result = $scriptBlockAst | Select-RuleViolation -Filter $predicate -Recurse -Debug
+      $result = $scriptBlockAst | Select-RuleViolation -Filter $predicate -Recurse
     }
 
     It 'The script block ast should be an AST object' {
