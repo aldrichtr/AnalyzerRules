@@ -4,7 +4,7 @@ param(
   )]
   [switch]$WithDocs
 )
-$stitchDir = (Join-Path $env:XDG_CONFIG_HOME 'stitch')
+$stitchDir = (Join-Path $env:APPDATA 'DevKit')
 $toolsDir = (Join-Path $stitchDir 'tools')
 
 task Clean {
@@ -44,6 +44,8 @@ task Build -Before Test {
 }
 
 task Test -Before Install {
+  $testRunner = (Join-Path $toolsDir "runTests.ps1")
+  Write-Build Yellow "Running tests using $testRunner"
   . "$toolsDir\runTests.ps1"
 }
 

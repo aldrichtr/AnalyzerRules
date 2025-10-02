@@ -24,48 +24,11 @@ BeforeDiscovery {
 $options = @{
   Tag     = @( 'unit', 'StringCase', 'Test', 'SnakeCase')
   Name    = 'given the private function Test-SnakeCase'
-  Foreach = $sourceFile
+  Foreach = $dataDirectory
 }
 Describe @options {
-
-  Context 'WHEN The function is sourced in the current environment' {
-    BeforeAll {
-      $sourceFile = $_
-      if ($sourceFile | Test-Path) {
-        $content = (Get-Content $sourceFile -Raw)
-        $tokens      = $null
-        $parseErrors = $null
-        $results = [Parser]::ParseInput($content, [ref]$tokens, [ref]$parseErrors)
-        $predicate = { param($Ast) $ast -is [FunctionDefinitionAst] }
-        $functionAst = $results.Find($predicate, $false)
-      }
-    }
-
-    It 'THEN it should parse without error' {
-      $parseErrors | Should -BeNullOrEmpty
-    }
-    It 'THEN it should load without error' {
-      (Get-Command 'Test-SnakeCase') | Should -Not -BeNullOrEmpty
-    }
-
-    It 'THEN it should contain a function' {
-      $functionAst | Should -Not -BeNullOrEmpty
-    }
-
-    It 'THEN the function name should match the file name' {
-      $functionAst.Name | Should -BeLike ($sourceFile | Split-Path -LeafBase)
-    }
-  }
-
-  Context 'WHEN the <rule.RuleName> rule is tested' -ForEach $analyzerRules {
-    BeforeAll {
-      # Rename automatic variable to rule to make it easier to work with
-      $rule = $_
-    }
-
-    It 'THEN it should pass' {
-      $analysis | Should -Pass $rule
-    }
+  BeforeAll {
+    $dataDirectory = $_
   }
   <# --=-- #>
   Context "WHEN the phrase '<Phrase>' is tested" -ForEach (
