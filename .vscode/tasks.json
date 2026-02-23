@@ -1,0 +1,49 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build the project",
+            "detail": "Build staging modules",
+            "type": "shell",
+            "command": "Invoke-Build Build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Run the unit tests",
+            "type": "shell",
+            "command": "Invoke-Build Test",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": "$pester",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Clean the project",
+            "type": "shell",
+            "command": "Invoke-Build Clean",
+            "group": "none",
+            "problemMatcher": [],
+            "presentation": {
+              "echo": true,
+              "reveal": "silent",
+              "focus": false,
+              "panel": "dedicated",
+              "showReuseMessage": true,
+              "clear": true
+            }
+
+        }
+    ]
+}
