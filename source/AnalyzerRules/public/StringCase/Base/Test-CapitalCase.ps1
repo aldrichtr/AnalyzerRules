@@ -1,5 +1,5 @@
 
-function Test-LowerCase {
+function Test-CapitalCase {
   <#
   .SYNOPSIS
     Return true if the given word is all lowercase
@@ -26,7 +26,7 @@ function Test-LowerCase {
     Write-Debug "`n$('-' * 80)`n-- Begin $($self.Name)`n$('-' * 80)"
   }
   process {
-    $pattern = Get-CasePattern -Case lower -DontAllowDigits:$DontAllowDigits
+    $pattern = Get-CasePattern -Case capital -DontAllowDigits:$DontAllowDigits
     ($InputObject -cmatch $pattern)
   }
   end {

@@ -1,5 +1,5 @@
 
-function Test-CapitalCase {
+function Test-UpperCase {
   <#
   .SYNOPSIS
     Return true if the given word is Capitalized
@@ -21,15 +21,8 @@ function Test-CapitalCase {
     )]
     [switch]$DontAllowDigits
   )
-  begin {
-    $self = $MyInvocation.MyCommand
-    Write-Debug "`n$('-' * 80)`n-- Begin $($self.Name)`n$('-' * 80)"
-  }
   process {
-    $pattern = Get-CasePattern -Case capital -DontAllowDigits:$DontAllowDigits
+    $pattern = Get-CasePattern -Case upper -DontAllowDigits:$DontAllowDigits
     ($InputObject -cmatch $pattern)
-  }
-  end {
-    Write-Debug "`n$('-' * 80)`n-- End $($self.Name)`n$('-' * 80)"
   }
 }

@@ -15,10 +15,6 @@ function Get-RuleSetting {
     )]
     [string]$KeyName
   )
-  begin {
-    $self = $MyInvocation.MyCommand
-    Write-Debug "`n$('-' * 80)`n-- Begin $($self.Name)`n$('-' * 80)"
-  }
   process {
     $settings = [Helper]::Instance.GetRuleArguments()
 
@@ -26,17 +22,16 @@ function Get-RuleSetting {
         ($settings.Keys.Count -gt 0)) {
       Write-Debug "Retrieved settings"
       if ($PSBoundParameters.ContainsKey('KeyName')) {
-        <#
-         # ------------------------------------------------------------------
+        <# ------------------------------------------------------------------
          # Our function names are in `Verb-Noun` format, but our Settings
          # are going to be in the form of `VerbNoun`.  So, just in case the
          # function name was passed in, format it before we do the lookup
-         # ------------------------------------------------------------------
-         #>
+         # ---------------------------------------------------------------- #>
         if ($KeyName -match '(\w+)-(\w+)<\w+>') {
           $KeyName = Format-RuleName $KeyName
           | Select-Object -ExpandProperty ShortName
         }
+
         if ($settings.ContainsKey($KeyName)) {
           Write-Debug "Found $KeyName in settings:"
           Write-Debug "$($settings[$KeyName] | ConvertTo-Json)"
@@ -51,8 +46,5 @@ function Get-RuleSetting {
     } else {
       Write-Debug "No settings were retrieved"
     }
-  }
-  end {
-    Write-Debug "`n$('-' * 80)`n-- End $($self.Name)`n$('-' * 80)"
   }
 }

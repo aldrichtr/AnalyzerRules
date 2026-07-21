@@ -5,7 +5,7 @@ using namespace System.Management.Automation.Language
 function Format-NamedBlock {
   <#
     .SYNOPSIS
-        Ensure Named script blocks (Begin, Process, etc...) are in the case given in the FormatNamedBlock setting.
+        Ensure Named script blocks are in the case given in the FormatNamedBlock setting.
     .DESCRIPTION
         Format the case of named blocks in a function (`begin`, `process`, `end`, `clean`).
     .NOTES
@@ -31,7 +31,7 @@ function Format-NamedBlock {
     [NamedBlockAst]$InputAst
   )
   begin {
-    $ruleName = $self | Format-RuleName | Select-Object -ExpandProperty ShortName
+    $ruleName = $self | Select-ShortName
     $keywordPattern = '^(begin|process|end|clean)'
     $case     = [StringCase]::None
 
@@ -73,22 +73,27 @@ function Format-NamedBlock {
 
     # SECTION Predicate definition
     [scriptblock]$predicate = {
-      param($ast)
+      param([Parameter()][Ast]$Ast)
 
-      $doesAstMatchPredicate = $false
-      $doesKeywordMatchCase  = $false
+      $isViolation = $isKeywordPresent = $doesKeywordMatchCase = $false
 
-      if ($ast -is [NamedBlockAst]) {
-        $null = $ast.Extent.Text -imatch $keywordPattern
+      if ($Ast -is [NamedBlockAst]) {
+        $null = $Ast.Extent.Text -imatch $keywordPattern
         $keyword = ${Matches}?.1
-        $doesAstMatchPredicate = ($null -ne $keyword)
-        $doesKeywordMatchCase = ($keyword | Test-Case $case.ToString())
-      }
+        $isKeywordPresent = ($null -ne $keyword)
+        if ($isKeywordPresent) {
+          $doesKeywordMatchCase = ($keyword | Test-Case $case.ToString())
+          if ($doesKeywordMatchCase) {
+            $isViolation = $false
+          } else {
+            $isViolation = $true
+          }
+        } else {
+          $isViolation = $false
+        }
 
-      # NOTE: We only want to match on violations, so the filter Should only match on Asts that are
-      # not in the right case.
-      $doesAstMatchPredicate = (-not $doesKeywordMatchCase)
-      return $astMatchesPredicate
+      }
+      return $isViolation
     }
     # !SECTION
   }

@@ -5,6 +5,7 @@ function ConvertTo-ScriptExtent {
     .SYNOPSIS
         Convert the given inputs into a ScriptExtent
     #>
+  [OutputType([System.Management.Automation.Language.ScriptExtent])]
   [CmdletBinding()]
   param(
     # The Ast with the extent we want to Convert
@@ -15,10 +16,6 @@ function ConvertTo-ScriptExtent {
     [IScriptExtent]$Extent
 
   )
-  begin {
-    $self = $MyInvocation.MyCommand
-    Write-Debug "`n$('-' * 80)`n-- Begin $($self.Name)`n$('-' * 80)"
-  }
   process {
     # SECTION StartPosition
 
@@ -53,8 +50,5 @@ function ConvertTo-ScriptExtent {
     # !SECTION
 
     $newExtent
-  }
-  end {
-    Write-Debug "`n$('-' * 80)`n-- End $($self.Name)`n$('-' * 80)"
   }
 }

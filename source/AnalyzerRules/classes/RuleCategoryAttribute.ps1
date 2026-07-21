@@ -1,10 +1,10 @@
 
 using namespace System
 
-class RuleCategory : Attribute {
+class RuleCategoryAttribute : Attribute {
   [string]$Name
 
-  RuleCategory([string]$n) {
+  RuleCategoryAttribute([string]$n) {
     $this.Name = $n
   }
 

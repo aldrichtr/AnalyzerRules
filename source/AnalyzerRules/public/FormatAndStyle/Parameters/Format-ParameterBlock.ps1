@@ -1,5 +1,10 @@
-function Format-ParameterAttributeBlock {
-    <#
+
+using namespace System.Collections
+using namespace System.Management.Automation.Language
+using namespace Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic
+
+function Format-ParameterBlock {
+  <#
     .SYNOPSIS
         Format a `[Parameter()]` block according to style rules
     .DESCRIPTION
@@ -14,221 +19,229 @@ function Format-ParameterAttributeBlock {
         - HelpMessageBaseName
         - HelpMessageResourceId
     #>
-    [CmdletBinding()]
-    [OutputType([DiagnosticRecord[]])]
-    param(
-        [Parameter(
-            Mandatory
-        )]
-        [ValidateNotNullOrEmpty()]
-        [ScriptBlockAst]$ScriptBlockAst
-    )
-    begin {
-        #-------------------------------------------------------------------------------
-        # SECTION Setup
-        $ruleName = (Format-RuleName)
+  [CmdletBinding()]
+  [OutputType([DiagnosticRecord[]])]
+  param(
+    [Parameter(
+      Mandatory,
+      ValueFromPipeline
+    )]
+    [ValidateNotNullOrEmpty()]
+    [ScriptBlockAst]$InputAst
+  )
+  begin {
+    $self = $MyInvocation.MyCommand
+    $ruleName = $self | Select-RuleName
 
-        $results = New-DiagnosticRecordCollection
-        $corrections = New-CorrectionCollection
-        $ruleArgs = Get-RuleSetting
+    # SECTION Category Settings
 
-        # !SECTION Setup
-        #-------------------------------------------------------------------------------
+    # !SECTION Category Settings
 
-        #-------------------------------------------------------------------------------
-        # SECTION defaults
+    # SECTION defaults
 
-        <#
+    <#
          The default setting is to separate Arguments on separate lines:
          ParameterSetName = 'Default',
          Mandatory
         #>
-        #TODO(Refactor): Change the Separator in settings to 'CR', 'CRLF', 'SPACE'
-        $separator = "`n"
+    # TODO(Refactor): Change the Separator in settings to 'CR', 'CRLF', 'SPACE'
+    $separator = "`n"
 
-        <#
-         The default is to omit the '= $true' expression on arguments
-        #>
-        $useTrueExpression = $false
-        <#
-         The default is to omit the argument if the expression is '= $false'
-        #>
-        $useFalseExpression = $false
+    <#
+     The default is to omit the '= $true' expression on arguments
+    #>
+    $useTrueExpression = $false
+    <#
+     The default is to omit the argument if the expression is '= $false'
+     #>
+    $useFalseExpression = $false
 
-        <#
-         if useFalseExpression is $true,
-         Exclude the following arguments if $false
-        #>
-        $excludeFalseExpression = @(
-            'HelpMessage',
-            'HelpMessageBaseName',
-            'HelpMessageResourceId'
-        )
+    <#
+     if useFalseExpression is $true,
+       Exclude the following arguments if $false
+     #>
+    $excludeFalseExpression = @(
+      'HelpMessage',
+      'HelpMessageBaseName',
+      'HelpMessageResourceId'
+    )
 
-        $argumentList = @(
-            'ParameterSetName',
-            'Mandatory',
-            'Position',
-            'DontShow',
-            'ValueFromPipeline',
-            'ValueFromPipelineByPropertyName',
-            'ValueFromRemainingArguments',
-            'HelpMessage',
-            'HelpMessageBaseName',
-            'HelpMessageResourceId'
-        )
-        # !SECTION defaults
-        #-------------------------------------------------------------------------------
+    $argumentList = @(
+      'ParameterSetName',
+      'Mandatory',
+      'Position',
+      'DontShow',
+      'ValueFromPipeline',
+      'ValueFromPipelineByPropertyName',
+      'ValueFromRemainingArguments',
+      'HelpMessage',
+      'HelpMessageBaseName',
+      'HelpMessageResourceId'
+    )
+    # !SECTION defaults
+    #-------------------------------------------------------------------------------
 
-        if ($null -ne $ruleArgs) {
-            # because the rule setting is 'useNewLine', if it is true (the default),
-            # then Arguments are separated by new lines, if not, then use a space
-            if (-not($ruleArgs.useNewLine)) {
-                $separator = ' '
-            }
-            if ($ruleArgs.ContainsKey('useTrueExpression')) {
-                $useTrueExpression = $ruleArgs.useTrueExpression
-            }
-            if ($ruleArgs.ContainsKey('useFalseExpression')) {
-                $useFalseExpression = $ruleArgs.useFalseExpression
-            }
-            if ($ruleArgs.ContainsKey('excludeFalseExpression')) {
-                $excludeFalseExpression = $ruleArgs.excludeFalseExpression
-            }
-            # allow the user to re-order the arguments
-            if ($ruleArgs.ContainsKey( 'argumentList' )) {
-                $newList = $ruleArgs.argumentList
+    $settings = Get-RuleSetting $ruleName
 
-                if (($newList.Count -gt 0) -and ($newList.Count -lt 10)) {
-                    # add any missing arguments to the bottom of the list
-                    foreach ($a in $argumentList) {
-                        # if the argument is not in the list already
-                        if ($newList -notcontains $a) {
-                            # if we are adding Falses
-                            # but not if they are excluded
-                            if (($useFalseExpression) -and ($excludeFalseExpression -notcontains $a)) {
-                                $newList += $a
-                            }
-                        }
-                    }
-                }
-                $argumentList = $newList
+    if ($null -ne $settings) {
+      # because the rule setting is 'useNewLine', if it is true (the default),
+      # then Arguments are separated by new lines, if not, then use a space
+      if (-not($settings.useNewLine)) {
+        $separator = ' '
+      }
+      if ($settings.ContainsKey('useTrueExpression')) {
+        $useTrueExpression = $settings.useTrueExpression
+      }
+      if ($settings.ContainsKey('useFalseExpression')) {
+        $useFalseExpression = $settings.useFalseExpression
+      }
+      if ($settings.ContainsKey('excludeFalseExpression')) {
+        $excludeFalseExpression = $settings.excludeFalseExpression
+      }
+      # allow the user to re-order the arguments
+      if ($settings.ContainsKey( 'argumentOrder' )) {
+        $order = $settings.argumentOrder
+
+        if ($order.Count -gt 0) {
+          # add any missing arguments to the bottom of the list
+          foreach ($a in $argumentList) {
+            # if the argument is not in the list already
+            if ($order -notcontains $a) {
+              # if we are adding Falses
+              # but not if they are excluded
+              if (($useFalseExpression) -and ($excludeFalseExpression -notcontains $a)) {
+                $order += $a
+              }
             }
+          }
         }
-        $listJoinCharacter = ",$separator"
-        # !SECTION RuleSettings
-        #-------------------------------------------------------------------------------
-
-        $findParameter = {
-            param(
-                [Parameter()]
-                [Ast]$Ast
-            )
-            (
-                ($Ast -is [AttributeAst]) -and
-                ($Ast.TypeName -like 'Parameter')
-            )
-        }
+        $argumentList = $order
+      }
     }
-    process {
-        try {
-            $parameterBlocks = $ScriptBlockAst | Select-RuleViolation $findParameter
+    $listJoinCharacter = ",$separator"
+    # !SECTION RuleSettings
+    #-------------------------------------------------------------------------------
 
-            foreach ($parameterBlock in $parameterBlocks) {
+    [scriptblock]$predicate = {
+      param( [Parameter()] [Ast]$Ast)
+      (
+        ($Ast -is [AttributeAst]) -and
+        ($Ast.TypeName -like 'Parameter')
+      )
+    }
+  }
+  process {
+    try {
+      $violations = $InputAst | Select-RuleViolation $predicate
+    } catch {
+      $err = $_ # The original error
+      $message = 'There was an error parsing'
+      $exceptionText = ( @($message, $err.ToString()) -join "`n")
+      $newException = [Exception]::new($exceptionText)
+      $eRecord = [System.Management.Automation.ErrorRecord]::new(
+        $newException,
+        $err.FullyQualifiedErrorId,
+        $err.CategoryInfo.Category,
+        $InputAst
+      )
+      $PSCmdlet.ThrowTerminatingError( $eRecord )
+    }
 
-                $extent = $parameterBlock.extent
-                $replacementList = @()
-                #! by looping through the argumentList, we can build the
-                #! replacementList in order
-                foreach ($argument in $argumentList) {
-                    # is this argument even listed in the ScriptBlock?
-                    $found = $parameterBlock.NamedArguments
-                    | Where-Object ArgumentName -Like $argument
-                    $indent = Get-Indent -Argument $argument -Extent $extent.Text
-                    if ($null -ne $found) {
-                        #yes, it is present
-                        # - does it have an expression? (an '= ?')
-                        if ($found.ExpressionOmitted -eq $false) {
-                            # yes, it has an expression
-                            # - is the expression '= $true'
-                            if ($found.Argument -like '$true') {
-                                # yes, the expression is '= $true'
-                                #  - do we need to set it in the correction?
-                                if ($useTrueExpression) {
-                                    # yes, we need to set it
-                                    $replacementList += "$indent$($found.ArgumentName) = `$true"
-                                } else {
-                                    # no, do not set it
-                                    $replacementList += "$indent$($found.ArgumentName)"
-                                }
-                                # - is the expression '= $false' and do we need to set it?
-                            } elseif ($found.Argument -like '$false') {
-                                if ($useFalseExpression) {
-                                    # yes, it is '= $false' and we need to set it
-                                    $replacementList += "$indent$($found.ArgumentName) = `$false"
-                                }
-                                # - is the expression something other than '$true' and '= $false'
-                            } else {
-                                # yes, it is not true or false, we need to set it
-                                $replacementList += "$indent$($found.ArgumentName) = $($found.Argument)"
-                            }
-                        } else {
-                            # no, it does not have an expression
-                            # - do we need to set the true expression?
-                            if ($useTrueExpression) {
-                                # yes, we need to set it
-                                $replacementList += "$indent$($found.ArgumentName) = `$true"
-                            } else {
-                                # no, we do not need to set it
-                                $replacementList += "$indent$($found.ArgumentName)"
-                            }
-                        }
-                    } else {
-                        # it was in the argumentList, but was not in the list of arguments
-                        # in the scriptblock, so we add it here if we are using false
-                        if ($useFalseExpression) {
-                            $replacementList += "$($found.ArgumentName) = `$false"
-                        }
-                    }
+    if ($violations.Count -gt 0) {
+      $results = New-DiagnosticRecordCollection
+
+
+      :violation foreach ($violation in $violations) {
+
+        $extent = $violation.extent
+        $replacementList = [ArrayList]::new()
+        #! by looping through the argumentList, we can build the
+        #! replacementList in order
+        :argument foreach ($argument in $argumentList) {
+          # is this argument even listed in the ScriptBlock?
+          $found = $violation.NamedArguments |
+            Where-Object ArgumentName -Like $argument
+
+          if ($null -ne $found) {
+            $indent = $extent.Text | Get-Indent $argument
+            # yes, it is present
+            # - does it have an expression? (an '= ?')
+            if ($found.ExpressionOmitted -eq $false) {
+              # yes, it has an expression
+              # - is the expression '= $true'
+              if ($found.Argument -like '$true') {
+                # yes, the expression is '= $true'
+                #  - do we need to set it in the correction?
+                if ($useTrueExpression) {
+                  # yes, we need to set it
+                  $null = $replacementList.Add("$indent$($found.ArgumentName) = `$true")
+                } else {
+                  # no, do not set it
+                  $null = $replacementList.Add("$indent$($found.ArgumentName)")
                 }
-                # if the argument is in the scriptblock, and we are not setting false expressions
-                # it is omitted
-
-                # if the argument is in the scriptblock and it is not in the argumentList
-                # it is omitted
-                # TODO: is that ok?
-                $head = [regex]::Escape('[Parameter(')
-                $foot = [regex]::Escape(')]')
-                $hindent = Get-Indent -Argument $head -Extent $extent.Text
-                $findent = Get-Indent -Argument $foot -Extent $extent.Text
-
-                $heading = "$hindent$head"
-                $footing = "$findent$foot"
-                $replacement = ( -join @(
-                        $heading,
-                        $separator,
-                    ($replacementList -join $listJoinCharacter),
-                        $separator,
-                        $footing
-                    ))
-                    # Compare the two strings, disregard whitespace
-                if (-not(Compare-Object $extent.Text.Trim() $replacement.Trim())) {
-                    $corrections += ($extent | New-PssaCorrection -ReplacementText $replacement)
-
-                    $options = @{
-                        Message              = 'Parameter attributes are true if present false if not'
-                        Severity             = 'Warning'
-                        Extent               = $extent
-                        SuggestedCorrections = $corrections
-                    }
-                    $results += (New-PSSADiagnosticRecord @options)
+                # - is the expression '= $false' and do we need to set it?
+              } elseif ($found.Argument -like '$false') {
+                if ($useFalseExpression) {
+                  # yes, it is '= $false' and we need to set it
+                  $null = $replacementList.Add("$indent$($found.ArgumentName) = `$false")
                 }
+                # - is the expression something other than '$true' and '= $false'
+              } else {
+                # yes, it is not true or false, we need to set it
+                $null = $replacementList.Add("$indent$($found.ArgumentName) = $($found.Argument)")
+              }
+            } else {
+              # no, it does not have an expression
+              # - do we need to set the true expression?
+              if ($useTrueExpression) {
+                # yes, we need to set it
+                $null = $replacementList.Add("$indent$($found.ArgumentName) = `$true")
+              } else {
+                # no, we do not need to set it
+                $null = $replacementList.Add("$indent$($found.ArgumentName)")
+              }
             }
-        } catch {
-            $PSCmdlet.ThrowTerminatingError($PSItem)
+          } else {
+            # it was in the argumentList, but was not in the list of arguments
+            # in the scriptblock, so we add it here if we are using false
+            if ($useFalseExpression) {
+              $null = $replacementList.Add("$($found.ArgumentName) = `$false")
+            }
+          }
         }
-    }
-    end {
-        $results
-    }
+
+        $head = [regex]::Escape('[Parameter(')
+        $foot = [regex]::Escape(')]')
+        $hindent = $extent | Get-Indent -Argument $head
+        $findent = $extent | Get-Indent -Argument $foot
+
+        $heading = "$hindent$head"
+        $footing = "$findent$foot"
+
+        $correctionOptions = @{
+          ReplacementText = (@(
+              $heading,
+              $separator,
+              ($replacementList -join $listJoinCharacter),
+              $separator,
+              $footing
+            ) -join '')
+          Description     = 'Format the parameter block correctly'
+        }
+
+        $correction = $extent | New-Correction @correctionOptions
+
+        $options = @{
+          RuleName             = $ruleName
+          Severity             = [RuleSeverity]'Warning'
+          Message              = 'Parameter attributes are true if present false if not'
+          Extent               = $extent
+          SuggestedCorrections = $correction
+        }
+        $results += (New-PSSADiagnosticRecord @options)
+      } # end foreach violation
+    } # end if violations
+  } end {
+    $results
+  }
 }

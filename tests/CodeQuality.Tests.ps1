@@ -123,7 +123,8 @@ Describe @options {
     #region Tests
 
     It 'THEN the file name (<_.BaseName>) should be the same as the function name' -Tag @('filename') {
-      $functionAst.Name | Should -BeLike ($sourceFile | Split-Path -LeafBase)
+      $baseName = ($sourceFile | Split-Path -LeafBase)
+      $functionAst.Name | Should -BeLike $baseName
     }
 
     It 'AND THEN it should parse without error' {
@@ -152,7 +153,7 @@ Describe @options {
     Context 'WHEN the <_.RuleName> rule is tested' -ForEach $Rules {
       BeforeAll { $rule = $_ }
 
-      It 'THEN it should pass' {
+      It 'THEN it should pass <_.RuleName>' {
         $analysis | Should -Pass $rule
       }
     }

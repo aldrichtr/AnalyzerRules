@@ -28,16 +28,6 @@ function New-Correction {
     [int]$EndColumnNumber,
     # !SECTION
 
-    # SECTION Offset
-    # Starting Offset number
-    [Parameter( ValueFromPipelineByPropertyName)]
-    [int]$StartOffsetNumber,
-
-    # Ending Offset number
-    [Parameter( ValueFromPipelineByPropertyName)]
-    [int]$EndOffsetNumber,
-    # !SECTION Offset
-
     # SECTION ScriptPosition
     # Starting ScriptPosition number
     [Parameter( ValueFromPipelineByPropertyName)]
