@@ -1,3 +1,7 @@
 dev/
 stage/
 out/
+
+## I put all the example projects in this folder
+.others/
+

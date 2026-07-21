@@ -6,9 +6,13 @@ param(
 )
 $stitchDir = (Join-Path $env:APPDATA 'DevKit')
 $toolsDir = (Join-Path $stitchDir 'tools')
+$sourceDir = (Join-Path $BuildRoot 'source')
+
+$projectName = ($BuildRoot | Split-Path -Leaf)
+$manifest = (Join-Path $sourceDir $projectName "${projectName}.psd1")
 
 task Clean {
-  @('stage')
+  @('stage', 'out')
   | ForEach-Object {
     Get-ChildItem "$BuildRoot/$_"
     | Remove-Item -Recurse -Force
@@ -35,7 +39,7 @@ task Compile -Before Build {
 }
 
 task Build -Before Test {
-  Get-ChildItem source -Directory
+  Get-ChildItem -Path $sourceDir -Directory
   | ForEach-Object {
     Set-Location $_
     Build-Module -OutputDirectory '..\..\stage'
@@ -76,6 +80,6 @@ task CreateDocs -After Build -If ($WithDocs) {
 
 task bumpVersion {
   $versionInfo = Get-GitVersion
-  Update-Metadata -Path 'source/PSOrgMode/PSOrgMode.psd1' -PropertyName ModuleVersion -Value $versionInfo.MajorMinorPatch
-  Update-Metadata -Path 'source/PSOrgMode/PSOrgMode.psd1' -PropertyName PreRelease -Value $versionInfo.InformationalVersion
+  Update-Metadata -Path $manifest -PropertyName ModuleVersion -Value $versionInfo.MajorMinorPatch
+  Update-Metadata -Path $manifest -PropertyName PreRelease -Value $versionInfo.InformationalVersion
 }
