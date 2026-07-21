@@ -1,0 +1,179 @@
+{
+  "folders": [
+    { "name": "Analyzer Rules Module", "path": "." }
+  ],
+  "settings": {
+    "powershell.startAutomatically": true,
+    "powershell.integratedConsole.showOnStartup": true,
+    "powershell.analyzeOpenDocumentsOnly": true,
+    "powershell.debugging.createTemporaryIntegratedConsole": true,
+    "[powershell]": {
+      "debug.saveBeforeStart": "nonUntitledEditorsInActiveGroup",
+      "editor.semanticHighlighting.enabled": true,
+      "editor.wordSeparators": "`~!@#$%^&*()=+[{]}\\|;:'\",.<>/?",
+      "editor.wordWrap": "wordWrapColumn",
+      "editor.rulers": [ 108 ],
+      "editor.tabSize": 2,
+      "editor.formatOnPaste": true,
+      "editor.autoIndentOnPaste": true,
+      "editor.definitionLinkOpensInPeek": true
+    },
+    "commentAnchors.tags.anchors": {
+      "ANCHOR": {
+        "iconColor": "default",
+        "highlightColor": "#A8C023",
+        "scope": "file"
+      },
+      "TODO": {
+        "iconColor": "blue",
+        "highlightColor": "#3ea8ff",
+        "scope": "workspace"
+      },
+      "FIXME": {
+        "iconColor": "red",
+        "highlightColor": "#F44336",
+        "scope": "workspace"
+      },
+      "STUB": {
+        "iconColor": "purple",
+        "highlightColor": "#BA68C8",
+        "scope": "file"
+      },
+      "NOTE": {
+        "iconColor": "orange",
+        "highlightColor": "#FFB300",
+        "scope": "file"
+      },
+      "REVIEW": {
+        "iconColor": "green",
+        "highlightColor": "#64DD17",
+        "scope": "workspace"
+      },
+      "SECTION": {
+        "iconColor": "blurple",
+        "highlightColor": "#896afc",
+        "scope": "workspace",
+        "behavior": "region"
+      },
+      "LINK": {
+        "iconColor": "#2ecc71",
+        "highlightColor": "#2ecc71",
+        "scope": "workspace",
+        "behavior": "link"
+      }
+    }
+  },
+  "extensions": {},
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build the project",
+            "detail": "Build staging modules",
+            "type": "shell",
+            "command": "Invoke-Build Build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Run the unit tests",
+            "type": "shell",
+            "command": "Invoke-Build Test",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": "$pester",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        },
+        {
+            "label": "Clean the project",
+            "type": "shell",
+            "command": "Invoke-Build Clean",
+            "group": "none",
+            "problemMatcher": [],
+            "presentation": {
+              "echo": true,
+              "reveal": "silent",
+              "focus": false,
+              "panel": "dedicated",
+              "showReuseMessage": true,
+              "clear": true
+            }
+
+        }
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        // SECTION Launch Current File
+        "name": "PowerShell Launch Current File",
+        "type": "PowerShell",
+        "request": "launch",
+        "script": "${file}",
+        "args": [ ],
+        "cwd": "${file}"
+      },
+      {
+        "name": "PowerShell Launch Current File in Temporary Console",
+        "type": "PowerShell",
+        "request": "launch",
+        "script": "${file}",
+        "args": [ ],
+        "cwd": "${file}"
+      },
+      {
+        "name": "PowerShell Launch Current File w/Args Prompt",
+        "type": "PowerShell",
+        "request": "launch",
+        "script": "${file}",
+        "args": [
+          "${command:SpecifyScriptArgs}"
+        ],
+        "cwd": "${file}"
+      },
+      // !SECTION
+      {
+        "name": "PowerShell Launch DebugTest.ps1",
+        "type": "PowerShell",
+        "request": "launch",
+        "script": "${workspaceRoot}/DebugTest.ps1",
+        "args": [
+          "-Count 55 -DelayMilliseconds 250"
+        ],
+        "cwd": "${workspaceRoot}"
+      },
+      {
+        "name": "PowerShell Interactive Session",
+        "type": "PowerShell",
+        "request": "launch",
+        "cwd": "${workspaceRoot}"
+      },
+      {
+        "name": "PowerShell Pester Tests",
+        "type": "PowerShell",
+        "request": "launch",
+        "script": "Invoke-Pester",
+        "args": [ ],
+        "cwd": "${workspaceRoot}"
+      },
+      {
+        "name": "PowerShell Attach to Host Process",
+        "type": "PowerShell",
+        "request": "attach",
+        "runspaceId": 1,
+      }
+    ]
+  }
+}
