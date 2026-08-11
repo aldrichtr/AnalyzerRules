@@ -1,0 +1,40 @@
+
+function Test-TrainCase {
+    <#
+    .SYNOPSIS
+        Returns true if the given word is Train-Case
+    #>
+    [CmdletBinding()]
+    param(
+        # The word to test
+        [Parameter(
+            ValueFromPipeline,
+            ValueFromPipelineByPropertyName
+        )]
+        [string]$InputObject,
+
+        # Do not allow numbers in words
+        [Parameter(
+        )]
+        [switch]$DontAllowDigits
+    )
+    begin {
+        $self = $MyInvocation.MyCommand
+Write-Debug "`n$('-' * 80)`n-- Begin $($MyInvocation.MyCommand.Name)`n$('-' * 80)"
+        $withoutDigits = '[A-Z][a-z]+'
+        $withDigits = '[A-Z][a-z0-9]+'
+        $separator = '-'
+    }
+    process {
+        if ($DontAllowDigits) {
+            $word = $withoutDigits
+        } else {
+            $word = $withDigits
+        }
+        $trainCasePattern = "^${word}${separator}${word}(${separator}${word})*"
+        $InputObject -cmatch $trainCasePattern
+    }
+    end {
+        Write-Debug "`n$('-' * 80)`n-- End $($self.Name)`n$('-' * 80)"
+    }
+}
