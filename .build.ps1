@@ -1,0 +1,87 @@
+param(
+  # Build Markdown Documents
+  [Parameter(
+  )]
+  [switch]$WithDocs
+)
+$stitchDir = (Join-Path $env:APPDATA 'DevKit')
+$toolsDir = (Join-Path $stitchDir 'tools')
+$sourceDir = (Join-Path $BuildRoot 'source')
+$sourcePath = $sourceDir
+
+$projectName = ($BuildRoot | Split-Path -Leaf)
+$manifest = (Join-Path $sourceDir $projectName "${projectName}.psd1")
+
+task Clean {
+  @('stage', 'out')
+  | ForEach-Object {
+    Get-ChildItem "$BuildRoot/$_"
+    | Remove-Item -Recurse -Force
+  }
+
+}
+
+task Validate -Before Compile {
+  @('docs', 'out', 'publish', 'stage')
+  | ForEach-Object {
+    $dir = (Join-Path $BuildRoot $_)
+    if (-not ($dir | Test-Path)) {
+      New-Item -Path $dir -ItemType Directory
+    }
+  }
+}
+
+task Compile -Before Build {
+  $projectFiles = Get-ChildItem $BuildRoot -Filter '*.csproj' -Recurse
+  $solutionFiles = Get-ChildItem $BuildRoot -Filter '*.sln' -Recurse
+  if (($null -ne $projectFiles) -or ($null -ne $solutionFiles)) {
+    & dotnet @('build')
+  }
+}
+
+task Build -Before Test {
+  Get-ChildItem -Path $sourceDir -Directory
+  | ForEach-Object {
+    Set-Location $_
+    Build-Module -OutputDirectory '..\..\stage'
+  }
+  Set-Location $BuildRoot
+}
+
+task Test -Before Install {
+  Import-Module PSScriptAnalyzer -Force -Global
+  $testRunner = (Join-Path $toolsDir "runTests.ps1")
+  Write-Build Yellow "Running tests using $testRunner"
+  . "$toolsDir\runTests.ps1"
+}
+
+task Install {}
+
+task Uninstall {}
+
+task Publish {}
+
+task . Build
+
+task CreateDocs -After Build -If ($WithDocs) {
+  $outputDir = "$BuildRoot\docs"
+  if (-not ($outputDir | Test-Path)) {
+    New-Item $outputDir -ItemType Directory -Force
+  }
+  Import-Module Microsoft.PowerShell.PlatyPS
+  . "$toolsDir\loadStagedModules.ps1"
+  $options = @{
+    ModuleInfo     = (Get-Module 'PSOrgMode')
+    OutputFolder   = $outputDir
+    WithModulePage = $true
+  }
+  New-MarkdownCommandHelp @options
+}
+
+
+
+task bumpVersion {
+  $versionInfo = Get-GitVersion
+  Update-Metadata -Path $manifest -PropertyName ModuleVersion -Value $versionInfo.MajorMinorPatch
+  Update-Metadata -Path $manifest -PropertyName PreRelease -Value $versionInfo.InformationalVersion
+}
